@@ -130,22 +130,23 @@ class imu():
         return phi,theta,psi
 
 
-if __name__ == "__main__":
-#    acc, mag, gyr = getCapteurs()
-#    imu1 = imu()
-#    i=0
-#    f = open('log_IMU','w')
-#    while True:
-#        i+=1
-#        print i
-#        ax,ay,az = acc.getAcc()
-#        hx,hy,hz = mag.getMag()
-#        gx,gy,gz = gyr.getGyr()
-#        phi,theta,psi = imu1.update([ax,ay,az],[hx,hy,hz],[gx,gy,gz])
-#        #imu1.update([1,0,0],[0,1,1],[0,0,0])
-#        f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
-#    f.close()
+def logIMU():
+    acc, mag, gyr = getCapteurs()
+    imu1 = imu()
+    i=0
+    f = open('log_IMU','w')
+    while True:
+        i+=1
+        print i
+        ax,ay,az = acc.getAcc()
+        hx,hy,hz = mag.getMag()
+        gx,gy,gz = gyr.getGyr()
+        phi,theta,psi = imu1.update([ax,ay,az],[hx,hy,hz],[gx,gy,gz])
+        #imu1.update([1,0,0],[0,1,1],[0,0,0])
+        f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
+    f.close()
 
+def plotIMU():
     from mpl_toolkits.mplot3d import Axes3D
     import matplotlib.pyplot as plt
 
@@ -165,5 +166,11 @@ if __name__ == "__main__":
     ax.plot(degrees(Tlog[:,11]))
 
     plt.show()
+
+	
+
+if __name__ == "__main__":
+    #logIMU()
+    plotIMU()
 
 

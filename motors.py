@@ -57,7 +57,7 @@ class Motors():
         if motor == 4: self.motor4.calibrate()
       
 if __name__ == "__main__":
-      
+      pass
 #PWMservo = PWM.Servo(dma_channel=0, subcycle_time_us=20000, pulse_incr_us=10))
 #
 ## Add servo pulse for GPIO 17 with 1200µs (1.2ms)

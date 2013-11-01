@@ -8,6 +8,7 @@ import sys
 
 from capteurs import getCapteurs
 from motors import Motors
+from imu import logIMU,plotIMU
 
 
 
@@ -49,7 +50,10 @@ def utilsIMU():
             calMag --> calibrate accelerometers
             
             calGyr --> calibrate gyrometers
-            
+ 
+            logIMU --> logging IMU data
+	    plotIMU --> plot logged IMU data
+ 	    
             0 --> go Back
             
             """
@@ -93,10 +97,16 @@ def utilsIMU():
         elif choice == 'calGyr':
             print 'calibrating gyrometers'
             gyr.calibrate()
+	    
+	elif choice == 'logIMU':
+	    logIMU()
+            
+	elif choice == 'plotIMU':
+	    plotIMU()
             
         elif choice == '0':
             return
-            
+	
         else:
             print "This choice is not reconized, try again"
 
