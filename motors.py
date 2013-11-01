@@ -51,10 +51,10 @@ class Motors():
   
 
     def calibrate(motor = 1):
-        if motor = 1: self.motor1.calibrate()
-        if motor = 2: self.motor2.calibrate()
-        if motor = 3: self.motor3.calibrate()
-        if motor = 4: self.motor4.calibrate()
+        if motor == 1: self.motor1.calibrate()
+        if motor == 2: self.motor2.calibrate()
+        if motor == 3: self.motor3.calibrate()
+        if motor == 4: self.motor4.calibrate()
       
 if __name__ == "__main__":
       
