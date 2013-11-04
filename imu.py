@@ -206,9 +206,46 @@ def plotIMU3d():
         
         plt.draw()
 
+def plotIMU3d_2():
+
+
+    acc, mag, gyr = getCapteurs()
+    imu = IMU()
+
+
+    ## build a QApplication before building other widgets
+    import pyqtgraph as pg
+    pg.mkQApp()
+    
+    ## make a widget for displaying 3D objects
+    import pyqtgraph.opengl as gl
+    view = gl.GLViewWidget()
+    w.opts['distance'] = 20
+    view.show()
+
+    ax = gl.GLAxisItem()
+    ax.setSize(5,5,5)
+    w.addItem(ax)
+    
+    b = gl.GLBoxItem()
+    w.addItem(b)
+    
+    ax2 = gl.GLAxisItem()
+    ax2.setParentItem(b)
+
+
+    while True:
+        phi,theta,psi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
+        b.rotate(degrees(phi),1,0,0,local = True)
+        b.rotate(degrees(theta),0,0,1,local = True)
+        b.rotate(degrees(psi),0,1,0,local = True)
+        
+    
+    
+    
 if __name__ == "__main__":
     #logIMU()
 #    plotIMU()
-    plotIMU3d()
+    plotIMU3d_2()
 
 
