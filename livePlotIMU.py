@@ -89,19 +89,19 @@ class CentralWidget(QWidget):
 
 
         self.plot41 = CurveWidget(self,title = "phi",xlabel = "Time")
-        layout.addWidget(self.plot31, 2, 0, 1, 1)
+        layout.addWidget(self.plot41, 3, 0, 1, 1)
         self.curve41 = make.curve([1,2,3], [2,3,1], color='b')
         self.plot41.plot.add_item(self.curve41)
         self.plot41.plot.set_axis_limits('left',-3.,3.)
 
         self.plot42 = CurveWidget(self,title = "theta",xlabel = "Time")
-        layout.addWidget(self.plot32, 2, 1, 1, 1)
+        layout.addWidget(self.plot42, 3, 1, 1, 1)
         self.curve42 = make.curve([1,2,3], [2,3,1], color='b')
         self.plot42.plot.add_item(self.curve42)
         self.plot42.plot.set_axis_limits('left',-3.,3.)
 
         self.plot43 = CurveWidget(self,title = "psi",xlabel = "Time")
-        layout.addWidget(self.plot33, 2, 2, 1, 1)
+        layout.addWidget(self.plot43, 3, 2, 1, 1)
         self.curve43 = make.curve([1,2,3], [2,3,1], color='b')
         self.plot43.plot.add_item(self.curve43)
         self.plot43.plot.set_axis_limits('left',-3.,3.)
@@ -155,7 +155,7 @@ class CentralWidget(QWidget):
             Twy.append(wy)
             Twz.append(wz)
             
-            phi,theta,psi = self.imu.update([accx,accy,accz],[hx,hy,hz],[wx,wy,wz])
+            phi,theta,psi = imu.update([accx,accy,accz],[hx,hy,hz],[wx,wy,wz])
             Tphi.append(phi)
             Ttheta.append(theta)
             Tpsi.append(psi)
