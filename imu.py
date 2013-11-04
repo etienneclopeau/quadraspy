@@ -188,18 +188,13 @@ def plotIMU3d():
     imu = IMU()
    
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    mat = quat2matrix(imu.quat)
-    vx = ax.plot([0,mat[0,0]],[0,mat[0,1]],[0,mat[0,2]])
-    vy = ax.plot([0,mat[1,0]],[0,mat[1,1]],[0,mat[1,2]])
-    vz = ax.plot([0,mat[2,0]],[0,mat[2,1]],[0,mat[2,2]])
-    print vx
+    ax = fig.add_subplot(111, projection='3d') 
+ 
     while True:
         imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
         mat = quat2matrix(imu.quat)
-        vx.remove()
-        vy.remove()
-        vz.remove()
+        
+	for line in ax.lines : line.remove() 
         vx = ax.plot([0,mat[0,0]],[0,mat[0,1]],[0,mat[0,2]])
         vy = ax.plot([0,mat[1,0]],[0,mat[1,1]],[0,mat[1,2]])
         vz = ax.plot([0,mat[2,0]],[0,mat[2,1]],[0,mat[2,2]])
@@ -213,26 +208,34 @@ def plotIMU3d_2():
     imu = IMU()
 
 
+    from pyqtgraph.Qt import QtGui
+    app = QtGui.QApplication([])
+
     ## build a QApplication before building other widgets
-    import pyqtgraph as pg
-    pg.mkQApp()
+    #import pyqtgraph as pg
+    #pg.mkQApp()
     
     ## make a widget for displaying 3D objects
     import pyqtgraph.opengl as gl
     view = gl.GLViewWidget()
-    w.opts['distance'] = 20
+    return
+    view.opts['distance'] = 20
     view.show()
 
+    return
     ax = gl.GLAxisItem()
     ax.setSize(5,5,5)
-    w.addItem(ax)
+    view.addItem(ax)
     
     b = gl.GLBoxItem()
-    w.addItem(b)
+    view.addItem(b)
     
     ax2 = gl.GLAxisItem()
     ax2.setParentItem(b)
 
+    QtGui.QApplication.instance().exec_()
+
+    return
 
     while True:
         phi,theta,psi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
