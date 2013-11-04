@@ -184,23 +184,25 @@ def plotIMU3d():
     import matplotlib
     matplotlib.interactive(True)
     
+    acc, mag, gyr = getCapteurs()
+    imu = IMU()
+   
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    imu = IMU()
     mat = quat2matrix(imu.quat)
-    vx = ax.plot([0,matrix[0,0]],[0,mat[0,1]],[0,mat[0,2]])
-    vy = ax.plot([0,matrix[1,0]],[0,mat[1,1]],[0,mat[1,2]])
-    vz = ax.plot([0,matrix[2,0]],[0,mat[2,1]],[0,mat[2,2]])
-    
+    vx = ax.plot([0,mat[0,0]],[0,mat[0,1]],[0,mat[0,2]])
+    vy = ax.plot([0,mat[1,0]],[0,mat[1,1]],[0,mat[1,2]])
+    vz = ax.plot([0,mat[2,0]],[0,mat[2,1]],[0,mat[2,2]])
+    print vx
     while True:
-        imu.update()
+        imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
         mat = quat2matrix(imu.quat)
         vx.remove()
         vy.remove()
         vz.remove()
-        vx = ax.plot([0,matrix[0,0]],[0,mat[0,1]],[0,mat[0,2]])
-        vy = ax.plot([0,matrix[1,0]],[0,mat[1,1]],[0,mat[1,2]])
-        vz = ax.plot([0,matrix[2,0]],[0,mat[2,1]],[0,mat[2,2]])
+        vx = ax.plot([0,mat[0,0]],[0,mat[0,1]],[0,mat[0,2]])
+        vy = ax.plot([0,mat[1,0]],[0,mat[1,1]],[0,mat[1,2]])
+        vz = ax.plot([0,mat[2,0]],[0,mat[2,1]],[0,mat[2,2]])
         
         plt.draw()
 
