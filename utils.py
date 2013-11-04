@@ -52,8 +52,8 @@ def utilsIMU():
             calGyr --> calibrate gyrometers
  
             logIMU --> logging IMU data
-	    plotIMU --> plot logged IMU data
- 	    
+        plotIMU --> plot logged IMU data
+         
             0 --> go Back
             
             """
@@ -97,16 +97,16 @@ def utilsIMU():
         elif choice == 'calGyr':
             print 'calibrating gyrometers'
             gyr.calibrate()
-	    
-	elif choice == 'logIMU':
-	    logIMU()
-            
-	elif choice == 'plotIMU':
-	    plotIMU()
+        
+        elif choice == 'logIMU':
+            logIMU()
+                
+        elif choice == 'plotIMU':
+            plotIMU()
             
         elif choice == '0':
             return
-	
+    
         else:
             print "This choice is not reconized, try again"
 

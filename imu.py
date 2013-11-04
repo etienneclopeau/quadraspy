@@ -12,7 +12,7 @@ from capteurs import getCapteurs
 def conj(q):
     return array([q[0],-q[1],-q[2],-q[3]])
 
-class imu():
+class IMU():
     """class IMU
     based on http:#www.x-io.co.uk/res/doc/madgwick_internal_report.pdf
     """
@@ -132,7 +132,7 @@ class imu():
 
 def logIMU():
     acc, mag, gyr = getCapteurs()
-    imu1 = imu()
+    imu = IMU()
     i=0
     f = open('log_IMU','w')
     while True:
@@ -141,7 +141,7 @@ def logIMU():
         ax,ay,az = acc.getAcc()
         hx,hy,hz = mag.getMag()
         gx,gy,gz = gyr.getGyr()
-        phi,theta,psi = imu1.update([ax,ay,az],[hx,hy,hz],[gx,gy,gz])
+        phi,theta,psi = imu.update([ax,ay,az],[hx,hy,hz],[gx,gy,gz])
         #imu1.update([1,0,0],[0,1,1],[0,0,0])
         f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
     f.close()
@@ -167,10 +167,46 @@ def plotIMU():
 
     plt.show()
 
-	
+def quat2matrix(quat):
+    q0=quat[0]
+    q1=quat[1]
+    q2=quat[2]
+    q3=quat[3]
+    
+    mat = array([[q0**2+q1**2-q2**2-q3**2, 2*(q1*q2-q0*q3)         ,2*(q0*q2+q1*q3)],
+                 [2*(q1*q2+q0*q3)        , q0**2-q1**2+q2**2-q3**2 ,2*(q2*q3-q0*q1)],
+                 [2*(q1*q3-q0*q2)        , 2*(q0*q1+q2*q3)         ,q0**2-q1**2-q2**2+q3**2]])
+    return mat
+
+def plotIMU3d():
+    from mpl_toolkits.mplot3d import Axes3D
+    import matplotlib.pyplot as plt
+    import matplotlib
+    matplotlib.interactive(True)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    imu = IMU()
+    mat = quat2matrix(imu.quat)
+    vx = ax.plot([0,matrix[0,0]],[0,mat[0,1]],[0,mat[0,2]])
+    vy = ax.plot([0,matrix[1,0]],[0,mat[1,1]],[0,mat[1,2]])
+    vz = ax.plot([0,matrix[2,0]],[0,mat[2,1]],[0,mat[2,2]])
+    
+    while True:
+        imu.update()
+        mat = quat2matrix(imu.quat)
+        vx.remove()
+        vy.remove()
+        vz.remove()
+        vx = ax.plot([0,matrix[0,0]],[0,mat[0,1]],[0,mat[0,2]])
+        vy = ax.plot([0,matrix[1,0]],[0,mat[1,1]],[0,mat[1,2]])
+        vz = ax.plot([0,matrix[2,0]],[0,mat[2,1]],[0,mat[2,2]])
+        
+        plt.draw()
 
 if __name__ == "__main__":
     #logIMU()
-    plotIMU()
+#    plotIMU()
+    plotIMU3d()
 
 
