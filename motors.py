@@ -4,11 +4,13 @@ Created on Thu Oct 17 13:56:55 2013
 
 @author: clopeau
 """
+import time
 from RPIO import PWM
-        
+PWMservo = PWM.Servo(dma_channel=0, subcycle_time_us=20000, pulse_incr_us=1)
+
 class Motor():
     def __init__(self,PWMservo , pin):
-        self.minpulse = 700 #microsecond
+        self.minpulse = 1000 #microsecond
         self.maxpulse = 2000 #microsecond
         self.pin = pin
         self.curentSpeed = 0.
@@ -17,28 +19,47 @@ class Motor():
         
     def setSpeed(self,speed):
         #speed is between 0 to 1
-        pulse = self.minpulse + speed*(self.maxpulse-self.minpulse)
+        pulse = int(self.minpulse + speed*(self.maxpulse-self.minpulse))
         
         self.PWMservo.set_servo(self.pin , pulse)
     
     def calibrate(self):
-        self.setSpeed(self,1)
-        print """ calibration of ESC on id """,self.id
+        print """ calibration of ESC on id """,self.pin
+        self.setSpeed(1)
         print """maxspeed selected 
                you can now connect the battery
                then wait 2s in press enter"""
-        input()
-        self.setspeed(0)
+        raw_input()
+        self.setSpeed(0)
         time.sleep(5)
         print """ your ESC should know be calibrated"""
-        
+ 
+    def test(self):
+        print """ test of ESC on id """,self.pin
+        self.setSpeed(0)
+        print """NE PAS INSTALLER LE HELICE !!!
+		please connect the battery and press enter"""
+        raw_input()
+	
+	v = 0
+        while v < 1:
+		v += 0.005
+		self.setSpeed(v)
+		time.sleep(0.5)
+	time.sleep(5)
+        while v > 0:
+		v -= 0.01
+		self.setSpeed(v)
+		time.sleep(0.5)
+        print """ motor test done"""
+	
         
 
 
 class Motors():
     def __init__(self):
         self.currentPower = 0.
-        self.motor1 = 19828 #adress motor 1
+        self.motor1 = Motor(PWMservo,18)     #adress motor 1
         self.motor2 = 1983
         self.motor3 = 8983
         self.motor4 = 9832
@@ -50,12 +71,18 @@ class Motors():
         dp is array 2*2 of real in [-1,1]"""
   
 
-    def calibrate(motor = 1):
+    def calibrate(self, motor = 1):
         if motor == 1: self.motor1.calibrate()
         if motor == 2: self.motor2.calibrate()
         if motor == 3: self.motor3.calibrate()
         if motor == 4: self.motor4.calibrate()
-      
+    
+    def test(self, motor = 1):
+        if motor == 1: self.motor1.test()
+        if motor == 2: self.motor2.test()
+        if motor == 3: self.motor3.test()
+        if motor == 4: self.motor4.test()
+        
 if __name__ == "__main__":
       pass
 #PWMservo = PWM.Servo(dma_channel=0, subcycle_time_us=20000, pulse_incr_us=10))
@@ -68,4 +95,6 @@ if __name__ == "__main__":
 #
 ## Clear servo on GPIO17
 #servo.stop_servo(17)
-    
+
+	
+
