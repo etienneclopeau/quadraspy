@@ -25,7 +25,7 @@ def utils():
         
         if choice == '1':
             utilsIMU()
-        elif choice == '1':
+        elif choice == '2':
             utilsMotors()
         else:
             print "This choice is not reconized, try again"
@@ -120,6 +120,7 @@ def utilsMotors():
         print "---------------------------"
         print """ 
               1 --> calibrate ESC
+	      2 --> test motor
               
               0 --> go back
               """
@@ -128,6 +129,10 @@ def utilsMotors():
         if choice == '1':
             choice = raw_input('please set the motor id to ccalibrate\n')
             motors.calibrate(int(choice))
+
+	elif choice == '2':
+            choice = raw_input('please set the motor id to test\n')
+            motors.test(int(choice))
 
         elif choice == '0':
             return
