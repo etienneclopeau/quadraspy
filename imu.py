@@ -4,6 +4,9 @@ Created on Tue Oct 15 16:07:31 2013
 
 @author: clopeau
 """
+import cython
+cimport numpy
+
 import time
 from numpy import   array,  sqrt,zeros,cross,arctan,arcsin,radians,degrees
 from numpy.linalg import norm as npnorm
@@ -12,6 +15,12 @@ from capteurs import getCapteurs
 def conj(q):
     return array([q[0],-q[1],-q[2],-q[3]])
 
+@cython.cclass
+@cython.locals(quat = numpy.ndarrayy[double, ndim=1],
+               earth_magnetic_field_x = cython.double,
+               earth_magnetic_field_z = cython.double,
+               gyrb = numpy.ndarrayy[double, ndim=1],
+               tbefore = cython.double)
 class IMU():
     """class IMU
     based on http:#www.x-io.co.uk/res/doc/madgwick_internal_report.pdf
@@ -19,13 +28,40 @@ class IMU():
     
     def __init__(self):
         self.quat = array([1.,0.,0.,0.]) # quaternion
-        self.earth_magnetic_field_x = 1 # orientation of earth magnetic field in ground coordinates
-        self.earth_magnetic_field_z = 0 
+        self.earth_magnetic_field_x = 1. # orientation of earth magnetic field in ground coordinates
+        self.earth_magnetic_field_z = 0. 
         self.gyr_b = zeros(3) # estimated bias of gyrometers
         self.tbefore = time.time()
 
 
-
+    @cython.cfunc
+    @cython.returns(cython.tuple)
+    @cython.locals(acc = cython.tuple, mag = cython.tuple, gyr = cython.tuple,
+                   tcurrent=cython.double, deltat=cython.double,
+                   gyroMeasError=cython.double,gyroMeasDrift=cython.double,
+                   beta=cython.double,zeta=cython.double,
+                   halfquat=numpy.ndarrayy[double, ndim=1],
+                   twoquat=numpy.ndarrayy[double, ndim=1],
+                   twoearth_magnetic_field_x=cython.double, twoearth_magnetic_field_z=cython.double, 
+                   twoearth_magnetic_field_xquat=cython.double, twoearth_magnetic_field_zquat=cython.double,
+                   twomag_x=cython.double, twomag_y=cython.double, twomag_z=cython.double,
+                   f_1=cython.double,f_2=cython.double,f_3=cython.double,f_4=cython.double,
+                   f_5=cython.double,f_6=cython.double,
+                   J_11or24=cython.double,J_12or23=cython.double,J_13or22=cython.double,
+                   J_14or21=cython.double,J_32=cython.double,J_33=cython.double,J_41=cython.double,
+                   J_42=cython.double,J_43=cython.double,J_44=cython.double,
+                   J_51=cython.double,J_52=cython.double,J_53=cython.double,
+                   J_54=cython.double,J_61=cython.double,J_62=cython.double,
+                   J_63=cython.double,J_64=cython.double,
+                   quatHatDot_1=cython.double,quatHatDot_2=cython.double,
+                   quatHatDot_3=cython.double,quatHatDot_4=cython.double,
+                   gyr_err=numpy.ndarrayy[double, ndim=1],
+                   quatDot_omega_1=cython.double,quatDot_omega_2=cython.double,
+                   quatDot_omega_3=cython.double,quatDot_omega_4=cython.double,
+                   h_x=cython.double,h_y=cython.double,h_z=cython.double,
+                   phi=cython.double,theta=cython.double,psi=cython.double
+                   )
+    @cython.boundscheck(False) # turn off boundscheck for this function
     def update(self, acc,mag,gyr):
         """acc, gyr, mag are array(3) mesurement of acceleration, angular rates and magnetic field
         """
