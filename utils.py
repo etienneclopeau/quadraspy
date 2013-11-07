@@ -8,7 +8,7 @@ import sys
 
 from capteurs import getCapteurs
 from motors import Motors
-from imu import logIMU,plotIMU
+from imu import logIMU,plotIMU,timeIMU
 
 
 
@@ -52,7 +52,8 @@ def utilsIMU():
             calGyr --> calibrate gyrometers
  
             logIMU --> logging IMU data
-        plotIMU --> plot logged IMU data
+            plotIMU --> plot logged IMU data
+            perfoIMU --> times 1000 iter
          
             0 --> go Back
             
@@ -103,6 +104,9 @@ def utilsIMU():
                 
         elif choice == 'plotIMU':
             plotIMU()
+            
+        elif choice == 'perfoIMU':
+            timeIMU(niter = 1000)
             
         elif choice == '0':
             return
