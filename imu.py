@@ -181,6 +181,16 @@ def logIMU():
         #imu1.update([1,0,0],[0,1,1],[0,0,0])
         f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
     f.close()
+    
+def timeIMU(niter = 1000):
+    acc, mag, gyr = getCapteurs()
+    imu = IMU()
+    i=0
+    t0 = time()
+    while True:
+        i+=1
+        phi,theta,psi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
+    print time() - t0
 
 def plotIMU():
     from mpl_toolkits.mplot3d import Axes3D
