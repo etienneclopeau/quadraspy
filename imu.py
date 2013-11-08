@@ -165,7 +165,7 @@ def timeIMU(niter = 1000):
     imu = IMU()
     i=0
     t0 = time.time()
-    while i< niter:
+    while i < niter:
         i+=1
         print i
         phi,theta,psi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
