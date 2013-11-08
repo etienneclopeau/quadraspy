@@ -55,6 +55,9 @@ class Acc(adxl345):
 class Mag(hmc5883l):
     def __init__(self):
         hmc5883l.__init__(self)
+        #self.setmode(self.HMC5883L_MODE_CONTINUOUS)
+        #self.setDataRate(self.HMC5883L_RATE_75)
+        self.setSampleAveraging(self.HMC5883L_AVERAGING_8)
         try :
             self.Mat,self.center,self.r = getCalData(fileCalMag)
         except : 

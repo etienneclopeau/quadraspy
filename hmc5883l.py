@@ -160,7 +160,8 @@ class hmc5883l:
     def getRawAxes(self):
         if (self.mode == self.HMC5883L_MODE_SINGLE):
             self.bus.write8(self.HMC5883L_RA_MODE, self.HMC5883L_MODE_SINGLE << (self.HMC5883L_MODEREG_BIT - self.HMC5883L_MODEREG_LENGTH + 1))  
-            time.sleep(0.01)
+            while not self.getReadyStatus():
+                pass
         data = self.bus.bus.read_i2c_block_data(self.address, 0x00)
         #print map(hex, data)
         x = self.__convert(data, 3)
@@ -217,9 +218,9 @@ class hmc5883l:
     def getIDC(self):
         result = self.bus.readByte(self.HMC5883L_RA_ID_C)
         return result       
-	
+    
     def selfTest(self):
-	# write CONFIG_A register
+    # write CONFIG_A register
         self.bus.write8(self.HMC5883L_RA_CONFIG_A,
             (self.HMC5883L_AVERAGING_8 << (self.HMC5883L_CRA_AVERAGE_BIT - self.HMC5883L_CRA_AVERAGE_LENGTH + 1)) |
             (self.HMC5883L_RATE_75    << (self.HMC5883L_CRA_RATE_BIT - self.HMC5883L_CRA_RATE_LENGTH + 1)) |
@@ -230,12 +231,12 @@ class hmc5883l:
     
         # write MODE register
         self.setMode(self.HMC5883L_MODE_SINGLE) 
-	
-	time.sleep(0.1)
-	
-	while True:
-	    magno_x, magno_y, magno_z = self.getAxes()
-	    print magno_x, magno_y, magno_z 
+    
+        time.sleep(0.1)
+        
+        while True:
+            magno_x, magno_y, magno_z = self.getAxes()
+            print magno_x, magno_y, magno_z 
 
 
 
