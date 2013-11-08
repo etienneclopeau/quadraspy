@@ -10,6 +10,13 @@ from capteurs import getCapteurs
 from motors import Motors
 from imu import logIMU,plotIMU,timeIMU
 
+import sys
+try:
+    choice1 = sys.argv[1]
+    choice2 = sys.argv[2]
+except :
+    choice1 = None
+    choice2 = None
 
 
 
@@ -21,7 +28,9 @@ def utils():
         2 --> motors
         
         """
-        choice = raw_input('please make a choice and press enter\n')
+        if choice1 == None:
+            choice = raw_input('please make a choice and press enter\n')
+        else: choice = choice1
         
         if choice == '1':
             utilsIMU()
@@ -58,7 +67,10 @@ def utilsIMU():
             0 --> go Back
             
             """
-        choice = raw_input('please set action and press enter\n')
+        
+        if choice2 == None:
+            choice = raw_input('please set action and press enter\n')
+        else: choice = choice2
     
         if choice == 'logAcc':
             print 'logging Accelerometers values'
@@ -128,13 +140,15 @@ def utilsMotors():
               
               0 --> go back
               """
-        choice = raw_input('please set action and press enter\n')
+        if choice2 == None:
+            choice = raw_input('please set action and press enter\n')
+        else: choice = choice2
     
         if choice == '1':
             choice = raw_input('please set the motor id to ccalibrate\n')
             motors.calibrate(int(choice))
 
-	elif choice == '2':
+        elif choice == '2':
             choice = raw_input('please set the motor id to test\n')
             motors.test(int(choice))
 
