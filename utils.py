@@ -14,6 +14,7 @@ import sys
 try:
     choice1 = sys.argv[1]
     choice2 = sys.argv[2]
+    stopafter = True
 except :
     choice1 = None
     choice2 = None
@@ -38,6 +39,9 @@ def utils():
             utilsMotors()
         else:
             print "This choice is not reconized, try again"
+	
+        if stopafter: return
+
     
     
 
@@ -125,6 +129,8 @@ def utilsIMU():
     
         else:
             print "This choice is not reconized, try again"
+	
+	if stopafter: return
 
 
 
