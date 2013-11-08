@@ -7,3 +7,5 @@ libs/*
 old/*
 calibration/*
 test/*
+*.so
+build/*
