@@ -4,9 +4,6 @@ Created on Tue Oct 15 16:07:31 2013
 
 @author: clopeau
 """
-import cython
-cimport numpy
-
 import time
 from numpy import   array,  sqrt,zeros,cross,arctan,arcsin,radians,degrees
 from numpy.linalg import norm as npnorm
@@ -15,53 +12,25 @@ from capteurs import getCapteurs
 def conj(q):
     return array([q[0],-q[1],-q[2],-q[3]])
 
-@cython.cclass
-@cython.locals(quat = numpy.ndarrayy[double, ndim=1],
-               earth_magnetic_field_x = cython.double,
-               earth_magnetic_field_z = cython.double,
-               gyrb = numpy.ndarrayy[double, ndim=1],
-               tbefore = cython.double)
 class IMU():
     """class IMU
     based on http:#www.x-io.co.uk/res/doc/madgwick_internal_report.pdf
     """
     
     def __init__(self):
-        self.quat = array([1.,0.,0.,0.]) # quaternion
-        self.earth_magnetic_field_x = 1. # orientation of earth magnetic field in ground coordinates
-        self.earth_magnetic_field_z = 0. 
-        self.gyr_b = zeros(3) # estimated bias of gyrometers
+        self.quat0 = 1.
+        self.quat1 = 0.
+        self.quat2 = 0.
+        self.quat3 = 0.
+        self.earth_magnetic_field_x = 1 # orientation of earth magnetic field in ground coordinates
+        self.earth_magnetic_field_z = 0 
+        self.gyr_b0 = 0
+        self.gyr_b1 = 0
+        self.gyr_b2 = 0 # estimated bias of gyrometers
         self.tbefore = time.time()
 
 
-    @cython.cfunc
-    @cython.returns(cython.tuple)
-    @cython.locals(acc = cython.tuple, mag = cython.tuple, gyr = cython.tuple,
-                   tcurrent=cython.double, deltat=cython.double,
-                   gyroMeasError=cython.double,gyroMeasDrift=cython.double,
-                   beta=cython.double,zeta=cython.double,
-                   halfquat=numpy.ndarrayy[double, ndim=1],
-                   twoquat=numpy.ndarrayy[double, ndim=1],
-                   twoearth_magnetic_field_x=cython.double, twoearth_magnetic_field_z=cython.double, 
-                   twoearth_magnetic_field_xquat=cython.double, twoearth_magnetic_field_zquat=cython.double,
-                   twomag_x=cython.double, twomag_y=cython.double, twomag_z=cython.double,
-                   f_1=cython.double,f_2=cython.double,f_3=cython.double,f_4=cython.double,
-                   f_5=cython.double,f_6=cython.double,
-                   J_11or24=cython.double,J_12or23=cython.double,J_13or22=cython.double,
-                   J_14or21=cython.double,J_32=cython.double,J_33=cython.double,J_41=cython.double,
-                   J_42=cython.double,J_43=cython.double,J_44=cython.double,
-                   J_51=cython.double,J_52=cython.double,J_53=cython.double,
-                   J_54=cython.double,J_61=cython.double,J_62=cython.double,
-                   J_63=cython.double,J_64=cython.double,
-                   quatHatDot_1=cython.double,quatHatDot_2=cython.double,
-                   quatHatDot_3=cython.double,quatHatDot_4=cython.double,
-                   gyr_err=numpy.ndarrayy[double, ndim=1],
-                   quatDot_omega_1=cython.double,quatDot_omega_2=cython.double,
-                   quatDot_omega_3=cython.double,quatDot_omega_4=cython.double,
-                   h_x=cython.double,h_y=cython.double,h_z=cython.double,
-                   phi=cython.double,theta=cython.double,psi=cython.double
-                   )
-    @cython.boundscheck(False) # turn off boundscheck for this function
+
     def update(self, acc,mag,gyr):
         """acc, gyr, mag are array(3) mesurement of acceleration, angular rates and magnetic field
         """
@@ -75,12 +44,14 @@ class IMU():
 
  
         # axulirary variables to avoid reapeated calcualtions
-        halfquat = 0.5 * self.quat
-        twoquat = 2.0 * self.quat
+        quata = array([self.quat0,self.quat1,self.quat2,self.quat3])
+        gyr_ba = array([self.gyr_b0, self.gyr_b1, self.gyr_b2])
+        halfquat = 0.5 * quata
+        twoquat = 2.0 * quata
         twoearth_magnetic_field_x = 2.0 * self.earth_magnetic_field_x
         twoearth_magnetic_field_z = 2.0 * self.earth_magnetic_field_z
-        twoearth_magnetic_field_xquat = 2.0 * self.earth_magnetic_field_x * self.quat
-        twoearth_magnetic_field_zquat = 2.0 * self.earth_magnetic_field_z * self.quat
+        twoearth_magnetic_field_xquat = 2.0 * self.earth_magnetic_field_x * quata
+        twoearth_magnetic_field_zquat = 2.0 * self.earth_magnetic_field_z * quata
         twomag_x = 2.0 * mag[0]
         twomag_y = 2.0 * mag[1]
         twomag_z = 2.0 * mag[2]
@@ -94,14 +65,14 @@ class IMU():
         mag /= npnorm(mag)
     
         # compute the objective function and Jacobian
-        f_1 = twoquat[1] * self.quat[3] - twoquat[0] * self.quat[2] - acc[0]
-        f_2 = twoquat[0] * self.quat[1] + twoquat[2] * self.quat[3] - acc[1]
-        f_3 = 1.0 - twoquat[1] * self.quat[1] - twoquat[2] * self.quat[2] - acc[2]
-        f_4 = twoearth_magnetic_field_x * (0.5 - self.quat[2] * self.quat[2] - self.quat[3] * self.quat[3]) + twoearth_magnetic_field_z * (self.quat[1]*self.quat[3] - self.quat[0]*self.quat[2]) - mag[0]
-        f_5 = twoearth_magnetic_field_x * (self.quat[1] * self.quat[2] - self.quat[0] * self.quat[3]) + twoearth_magnetic_field_z * (self.quat[0] * self.quat[1] + self.quat[2] * self.quat[3]) - mag[1]
-        f_6 = twoearth_magnetic_field_x * (self.quat[0]*self.quat[2] + self.quat[1]*self.quat[3]) + twoearth_magnetic_field_z * (0.5 - self.quat[1] * self.quat[1] - self.quat[2] * self.quat[2]) - mag[2]
+        f_1 = twoquat[1] * self.quat3 - twoquat[0] * self.quat2 - acc[0]
+        f_2 = twoquat[0] * self.quat1 + twoquat[2] * self.quat3 - acc[1]
+        f_3 = 1.0 - twoquat[1] * self.quat1 - twoquat[2] * self.quat2 - acc[2]
+        f_4 = twoearth_magnetic_field_x * (0.5 - self.quat2 * self.quat2 - self.quat3 * self.quat3) + twoearth_magnetic_field_z * (self.quat1*self.quat3 - self.quat0*self.quat2) - mag[0]
+        f_5 = twoearth_magnetic_field_x * (self.quat1 * self.quat2 - self.quat0 * self.quat3) + twoearth_magnetic_field_z * (self.quat0 * self.quat1 + self.quat2 * self.quat3) - mag[1]
+        f_6 = twoearth_magnetic_field_x * (self.quat0*self.quat2 + self.quat1*self.quat3) + twoearth_magnetic_field_z * (0.5 - self.quat1 * self.quat1 - self.quat2 * self.quat2) - mag[2]
         J_11or24 = twoquat[2] # J_11 negated in matrix multiplication
-        J_12or23 = 2.0 * self.quat[3]
+        J_12or23 = 2.0 * self.quat3
         J_13or22 = twoquat[0] # J_12 negated in matrix multiplication
         J_14or21 = twoquat[1]
         J_32 = 2.0 * J_14or21 # negated in matrix multiplication
@@ -135,34 +106,41 @@ class IMU():
                          twoquat[0] * quatHatDot_3 + twoquat[1] * quatHatDot_4 - twoquat[2] * quatHatDot_1 - twoquat[3] * quatHatDot_2,
                          twoquat[0] * quatHatDot_4 - twoquat[1] * quatHatDot_3 + twoquat[2] * quatHatDot_2 - twoquat[3] * quatHatDot_1])
         # compute and remove the gyroscope baises
-        self.gyr_b += gyr_err * deltat * zeta
-        gyr -= self.gyr_b
+        
+        gyr_ba += gyr_err * deltat * zeta
+        self.gyr_b0, self.gyr_b1, self.gyr_b2 = gyr_ba[0],gyr_ba[1],gyr_ba[2]
+        gyr -= gyr_ba
         # compute the quaternion rate measured by gyroscopes
         quatDot_omega_1 = -halfquat[1] * gyr[0] - halfquat[2] * gyr[1] - halfquat[3] * gyr[2]
         quatDot_omega_2 = halfquat[0] * gyr[0] + halfquat[2] * gyr[2] - halfquat[3] * gyr[1]
         quatDot_omega_3 = halfquat[0] * gyr[1] - halfquat[1] * gyr[2] + halfquat[3] * gyr[0]
         quatDot_omega_4 = halfquat[0] * gyr[2] + halfquat[1] * gyr[1] - halfquat[2] * gyr[0]
         # compute then integrate the estimated quaternion rate
-        self.quat[0] += (quatDot_omega_1 - (beta * quatHatDot_1)) * deltat
-        self.quat[1] += (quatDot_omega_2 - (beta * quatHatDot_2)) * deltat
-        self.quat[2] += (quatDot_omega_3 - (beta * quatHatDot_3)) * deltat
-        self.quat[3] += (quatDot_omega_4 - (beta * quatHatDot_4)) * deltat
+        self.quat0 += (quatDot_omega_1 - (beta * quatHatDot_1)) * deltat
+        self.quat1 += (quatDot_omega_2 - (beta * quatHatDot_2)) * deltat
+        self.quat2 += (quatDot_omega_3 - (beta * quatHatDot_3)) * deltat
+        self.quat3 += (quatDot_omega_4 - (beta * quatHatDot_4)) * deltat
         # normalise quaternion
-        self.quat /= npnorm(self.quat)
+        norm = sqrt(self.quat0*self.quat0+self.quat1*self.quat1+self.quat2*self.quat2+self.quat3*self.quat3)
+        self.quat0 = self.quat0/norm 
+        self.quat1 = self.quat1/norm 
+        self.quat2 = self.quat2/norm 
+        self.quat3 = self.quat3/norm 
+	
         # compute flux in the earth frame
-        h_x = twomag_x * (0.5 - self.quat[2] * self.quat[2] - self.quat[3] * self.quat[3]) + twomag_y * (self.quat[1]*self.quat[2] - self.quat[0]*self.quat[3]) + twomag_z * (self.quat[1]*self.quat[3] + self.quat[0]*self.quat[2])
-        h_y = twomag_x * (self.quat[1]*self.quat[2] + self.quat[0]*self.quat[3]) + twomag_y * (0.5 - self.quat[1] * self.quat[1] - self.quat[3] * self.quat[3]) + twomag_z * (self.quat[2]*self.quat[3] - self.quat[0]*self.quat[1])
-        h_z = twomag_x * (self.quat[1]*self.quat[3] - self.quat[0]*self.quat[2]) + twomag_y * (self.quat[2]*self.quat[3] + self.quat[0]*self.quat[1]) + twomag_z * (0.5 - self.quat[1] * self.quat[1] - self.quat[2] * self.quat[2])
+        h_x = twomag_x * (0.5 - self.quat2 * self.quat2 - self.quat3 * self.quat3) + twomag_y * (self.quat1*self.quat2 - self.quat0*self.quat3) + twomag_z * (self.quat1*self.quat3 + self.quat0*self.quat2)
+        h_y = twomag_x * (self.quat1*self.quat2 + self.quat0*self.quat3) + twomag_y * (0.5 - self.quat1 * self.quat1 - self.quat3 * self.quat3) + twomag_z * (self.quat2*self.quat3 - self.quat0*self.quat1)
+        h_z = twomag_x * (self.quat1*self.quat3 - self.quat0*self.quat2) + twomag_y * (self.quat2*self.quat3 + self.quat0*self.quat1) + twomag_z * (0.5 - self.quat1 * self.quat1 - self.quat2 * self.quat2)
         # normalise the flux vector to have only components in the x and z
         self.earth_magnetic_field_x = sqrt((h_x * h_x) + (h_y * h_y))
         self.earth_magnetic_field_z = h_z
         
         self.tbefore = tcurrent
 
-        phi = arctan(2.*(self.quat[0]*self.quat[1]+self.quat[2]*self.quat[3])/(1-2*(self.quat[1]**2+self.quat[2]**2)))
-        theta = arcsin(2*(self.quat[0]*self.quat[2]-self.quat[3]*self.quat[1]))
-        psi = arctan(2.*(self.quat[0]*self.quat[3]+self.quat[1]*self.quat[2])/(1-2*(self.quat[2]**2+self.quat[3]**2)))
-        print phi,theta,psi
+        phi = arctan(2.*(self.quat0*self.quat1+self.quat2*self.quat3)/(1-2*(self.quat1**2+self.quat2**2)))
+        theta = arcsin(2*(self.quat0*self.quat2-self.quat3*self.quat1))
+        psi = arctan(2.*(self.quat0*self.quat3+self.quat1*self.quat2)/(1-2*(self.quat2**2+self.quat3**2)))
+        #print phi,theta,psi
         return phi,theta,psi
 
 
@@ -177,7 +155,7 @@ def logIMU():
         ax,ay,az = acc.getAcc()
         hx,hy,hz = mag.getMag()
         gx,gy,gz = gyr.getGyr()
-        phi,theta,psi = imu.update([ax,ay,az],[hx,hy,hz],[gx,gy,gz])
+        phi,theta,psi = imu.update((ax,ay,az),(hx,hy,hz),(gx,gy,gz))
         #imu1.update([1,0,0],[0,1,1],[0,0,0])
         f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
     f.close()
@@ -186,11 +164,12 @@ def timeIMU(niter = 1000):
     acc, mag, gyr = getCapteurs()
     imu = IMU()
     i=0
-    t0 = time()
-    while True:
+    t0 = time.time()
+    while i< niter:
         i+=1
+        print i
         phi,theta,psi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
-    print time() - t0
+    print time.time() - t0
 
 def plotIMU():
     from mpl_toolkits.mplot3d import Axes3D
@@ -240,12 +219,12 @@ def plotIMU3d():
         imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
         mat = quat2matrix(imu.quat)
         
-	for line in ax.lines : line.remove() 
-        vx = ax.plot([0,mat[0,0]],[0,mat[0,1]],[0,mat[0,2]])
-        vy = ax.plot([0,mat[1,0]],[0,mat[1,1]],[0,mat[1,2]])
-        vz = ax.plot([0,mat[2,0]],[0,mat[2,1]],[0,mat[2,2]])
+    for line in ax.lines : line.remove() 
+    vx = ax.plot([0,mat[0,0]],[0,mat[0,1]],[0,mat[0,2]])
+    vy = ax.plot([0,mat[1,0]],[0,mat[1,1]],[0,mat[1,2]])
+    vz = ax.plot([0,mat[2,0]],[0,mat[2,1]],[0,mat[2,2]])
         
-        plt.draw()
+    plt.draw()
 
 def plotIMU3d_2():
 

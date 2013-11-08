@@ -26,9 +26,9 @@ class Acc(adxl345):
             self.Mat,self.center,self.r = getCalData(fileCalAcc)
         except : 
             print 'WARNING : no calibration data evailable for accelerometers'
-            self.Mat = array([[1,0,0],[0,1,0],[0,0,1]])
-            self.center = array([0,0,0])
-            self.r = array([1,1,1])
+            self.Mat = array([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]])
+            self.center = array([0.,0.,0.])
+            self.r = array([1.,1.,1.])
         
             
     def logValues(self, runningtime = 30, sleep = 0.1, add = False):
@@ -59,9 +59,9 @@ class Mag(hmc5883l):
             self.Mat,self.center,self.r = getCalData(fileCalMag)
         except : 
             print 'WARNING : no calibration data evailable for magnetometers'
-            self.Mat = array([[1,0,0],[0,1,0],[0,0,1]])
-            self.center = array([0,0,0])
-            self.r = array([1,1,1])
+            self.Mat = array([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]])
+            self.center = array([0.,0.,0.])
+            self.r = array([1.,1.,1.])
         
             
     def logValues(self, runningtime = 30, sleep = 0.1, add = False):
@@ -97,7 +97,7 @@ class Gyr(itg3205):
     
     def getGyr(self):
         wx,wy,wz = self.getRadPerSecAxes()
-        return wx-self.dx, wy-self.dy, wz-self.dz
+        return array([wx-self.dx, wy-self.dy, wz-self.dz])
 #        return wx, wy, wz
 
     def calibrate(self):
