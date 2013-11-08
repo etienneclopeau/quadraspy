@@ -137,15 +137,9 @@ class IMU():
         
         self.tbefore = tcurrent
 
-<<<<<<< local
-        phi = arctan(2.*(self.quat[0]*self.quat[1]+self.quat[2]*self.quat[3])/(1-2*(self.quat[1]**2+self.quat[2]**2)))
-        theta = arcsin(2*(self.quat[0]*self.quat[2]-self.quat[3]*self.quat[1]))
-        psi = arctan(2.*(self.quat[0]*self.quat[3]+self.quat[1]*self.quat[2])/(1-2*(self.quat[2]**2+self.quat[3]**2)))
-=======
         phi = arctan(2.*(self.quat0*self.quat1+self.quat2*self.quat3)/(1-2*(self.quat1**2+self.quat2**2)))
         theta = arcsin(2*(self.quat0*self.quat2-self.quat3*self.quat1))
         psi = arctan(2.*(self.quat0*self.quat3+self.quat1*self.quat2)/(1-2*(self.quat2**2+self.quat3**2)))
->>>>>>> other
         #print phi,theta,psi
         return phi,theta,psi
 
