@@ -18,6 +18,7 @@ try:
 except :
     choice1 = None
     choice2 = None
+    stopafter = False
 
 
 
