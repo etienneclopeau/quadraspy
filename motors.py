@@ -78,11 +78,11 @@ class Motors():
         self.motor4.setSpeed(p[1,1])
   
 
-    def calibrate(self, motor = 1):
-        if motor == 1: self.motor1.calibrate()
-        if motor == 2: self.motor2.calibrate()
-        if motor == 3: self.motor3.calibrate()
-        if motor == 4: self.motor4.calibrate()
+    def calibrate(self, motor = 'all'):
+        if motor in (1,'all'): self.motor1.calibrate()
+        if motor in (2,'all'): self.motor2.calibrate()
+        if motor in (3,'all'): self.motor3.calibrate()
+        if motor in (4,'all'): self.motor4.calibrate()
     
     def test(self, motor = 1):
         if motor == 1: self.motor1.test()
