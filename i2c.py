@@ -105,7 +105,7 @@ class i2c:
         
     def readBytesListU(self, reg, length):
         
-        return read_i2c_block_data(self.address, reg, length)        
+        return self.bus.read_i2c_block_data(self.address, reg, length)        
 #        output = []
 #        
 #        i = 0
@@ -117,7 +117,7 @@ class i2c:
 
     def readBytesListS(self, reg, length):
 
-        resU = read_i2c_block_data(self.address, reg, length)        
+        resU = self.bus.read_i2c_block_data(self.address, reg, length)        
         resS = list()
         for r in resU :       
             if r > 127:
