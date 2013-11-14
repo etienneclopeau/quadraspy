@@ -9,7 +9,7 @@ from time import sleep,time
 
 from imu import IMU
 from capteurs import getCapteurs
-from moteur import Motors
+from motors import Motors
 
 
 imu = IMU()
