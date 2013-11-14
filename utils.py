@@ -9,6 +9,7 @@ import sys
 from capteurs import getCapteurs
 from motors import Motors
 from imu import logIMU,plotIMU,timeIMU
+from numpy import degrees
 
 import sys
 try:
@@ -133,7 +134,7 @@ def utilsIMU():
             print 'print gyrometers values'
             while True:
                 values = gyr.getGyr()
-                print values
+                print degrees(values)
         
         elif choice == 'calGyr':
             print 'calibrating gyrometers'
