@@ -37,22 +37,22 @@ class Motor():
     def test(self):
         print """ test of ESC on id """,self.pin
         self.setSpeed(0)
-        print """NE PAS INSTALLER LE HELICE !!!
-		please connect the battery and press enter"""
+        print """NE PAS INSTALLER LES HELICES !!!
+        please connect the battery and press enter"""
         raw_input()
-	
-	v = 0
+    
+        v = 0
         while v < 1:
-		v += 0.005
-		self.setSpeed(v)
-		time.sleep(0.5)
-	time.sleep(5)
+            v += 0.01
+            self.setSpeed(v)
+            time.sleep(0.1)
+        time.sleep(2)
         while v > 0:
-		v -= 0.01
-		self.setSpeed(v)
-		time.sleep(0.5)
+            v -= 0.01
+            self.setSpeed(v)
+            time.sleep(0.1)
         print """ motor test done"""
-	
+    
         
 
 
@@ -120,5 +120,5 @@ if __name__ == "__main__":
 ## Clear servo on GPIO17
 #servo.stop_servo(17)
 
-	
+    
 
