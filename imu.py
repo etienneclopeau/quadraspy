@@ -144,11 +144,11 @@ class IMU():
         return phi,theta,psi
 
 
-def logIMU():
+def logIMU(print_ = True, log = False):
     acc, mag, gyr = getCapteurs()
     imu = IMU()
     i=0
-    f = open('log_IMU','w')
+    if log: f = open('log_IMU','w')
     while True:
         i+=1
         print i
@@ -156,10 +156,9 @@ def logIMU():
         hx,hy,hz = mag.getMag()
         gx,gy,gz = gyr.getGyr()
         phi,theta,psi = imu.update((ax,ay,az),(hx,hy,hz),(gx,gy,gz))
-        print '%10.5f %10.5f %10.5f'%(degrees(phi),degrees(theta),degrees(psi))
-        #imu1.update([1,0,0],[0,1,1],[0,0,0])
-        f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
-    f.close()
+        if print_ : print '%10.7f %10.7f %10.7f'%(phi,theta,psi)
+        if log : f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
+    if log : f.close()
     
 def timeIMU(niter = 1000):
     acc, mag, gyr = getCapteurs()
