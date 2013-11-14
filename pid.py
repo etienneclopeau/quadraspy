@@ -25,7 +25,7 @@ class PID():
         error =  consigne - currentValue
         self.errSum += (error * timeChange)
         dErr = (error - self.lastErr) / timeChange
-        print error, self.errSum,dErr  
+#        print error, self.errSum,dErr  
         #Compute PID Output
         Output = self.kp * error + self.ki * self.errSum + self.kd * dErr
           
