@@ -79,10 +79,27 @@ class Motors():
   
 
     def calibrate(self, motor = 'all'):
-        if motor in (1,'all'): self.motor1.calibrate()
-        if motor in (2,'all'): self.motor2.calibrate()
-        if motor in (3,'all'): self.motor3.calibrate()
-        if motor in (4,'all'): self.motor4.calibrate()
+        if motor == 'all' : 
+            print """ calibration of all ESC """
+            self.motor1.setSpeed(1)
+            self.motor2.setSpeed(1)
+            self.motor3.setSpeed(1)
+            self.motor4.setSpeed(1)
+            print """maxspeed selected 
+                   you can now connect the battery
+                   then wait 2s in press enter"""
+            raw_input()
+            self.motor1.setSpeed(0)
+            self.motor2.setSpeed(0)
+            self.motor3.setSpeed(0)
+            self.motor4.setSpeed(0)
+            time.sleep(5)
+            print """ your ESC should know be calibrated"""
+
+        elif motor == 1: self.motor1.calibrate()
+        elif motor == 2: self.motor2.calibrate()
+        elif motor == 3: self.motor3.calibrate()
+        elif motor == 4: self.motor4.calibrate()
     
     def test(self, motor = 1):
         if motor == 1: self.motor1.test()
