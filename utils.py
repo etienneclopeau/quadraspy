@@ -158,7 +158,8 @@ def utilsMotors():
     
         if choice == '1':
             choice = raw_input('please set the motor id to ccalibrate\n')
-            motors.calibrate(int(choice))
+            if not choice == 'all' : choice = int(choice)
+            motors.calibrate(choice)
 
         elif choice == '2':
             choice = raw_input('please set the motor id to test\n')
