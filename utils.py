@@ -85,11 +85,11 @@ def utilsIMU():
     
         if choice == 'logAcc':
             print 'logging Accelerometers values'
-            acc.logValues(runningtime = 60, sleep = 0.1)
+            acc.logValues(runningtime = 60, sleep = None)
         
         elif choice == 'addlogAcc':
             print 'logging additional Accelerometers values'
-            acc.logValues(runningtime = 60, sleep = 0.1, add = True)
+            acc.logValues(runningtime = 60, sleep = None, add = True)
     
         elif choice == 'printAcc':
             print 'print Accelerometers values'
