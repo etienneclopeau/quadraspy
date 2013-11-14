@@ -59,16 +59,19 @@ class Motor():
 class Motors():
     def __init__(self):
         self.currentPower = 0.
-        self.motor1 = Motor(PWMservo,18)     #adress motor 1
-        self.motor2 = 1983
-        self.motor3 = 8983
-        self.motor4 = 9832
+        self.motor1 = Motor(PWMservo,17)     #adress motor 1
+        self.motor2 = Motor(PWMservo,18)
+        self.motor3 = Motor(PWMservo,22)
+        self.motor4 = Motor(PWMservo,23)
         
         
-    def setMotorsSpeed(p,dp):
+    def setMotorsSpeed(p):
         """ 
-        p is the total power        
-        dp is array 2*2 of real in [-1,1]"""
+        p is array 2*2 of real in [0,1]"""
+        self.motor1.setSpeed(p[0,0])
+        self.motor2.setSpeed(p[0,1])
+        self.motor3.setSpeed(p[1,0])
+        self.motor4.setSpeed(p[1,1])
   
 
     def calibrate(self, motor = 1):
