@@ -67,6 +67,7 @@ def utilsIMU():
             calGyr --> calibrate gyrometers
  
             logIMU --> logging IMU data
+            printIMU --> print values
             plotIMU --> plot logged IMU data
             perfoIMU --> times 1000 iter
          
@@ -118,7 +119,10 @@ def utilsIMU():
             gyr.calibrate()
         
         elif choice == 'logIMU':
-            logIMU()
+            logIMU(print_ = False, log = True)
+                
+        elif choice == 'printIMU':
+            logIMU(print_ = True, log = False)
                 
         elif choice == 'plotIMU':
             plotIMU()
