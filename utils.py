@@ -56,14 +56,17 @@ def utilsIMU():
             utils for IMU
             logAcc --> logging Accelerometers values
             addlogAcc --> logging additional Accelerometers values
+            printAcc --> print Accelerometers values
             plotAcc --> plot logged accelerometers values
             calAcc --> calibrate accelerometers
     
-            logMag --> logging Accelerometers values
-            addlogMag --> logging additional Accelerometers values
-            plotMag --> plot logged accelerometers values
-            calMag --> calibrate accelerometers
+            logMag --> logging magnetometers values
+            addlogMag --> logging additional magnetometers values
+            printMag --> print magnetometers values
+            plotMag --> plot logged magnetometers values
+            calMag --> calibrate magnetometers
             
+            printGyr --> print gyrometers values
             calGyr --> calibrate gyrometers
  
             logIMU --> logging IMU data
@@ -87,6 +90,12 @@ def utilsIMU():
             print 'logging additional Accelerometers values'
             acc.logValues(runningtime = 60, sleep = 0.1, add = True)
     
+        elif choice == 'printAcc':
+            print 'print Accelerometers values'
+            while True:
+                values = acc.getAcc()
+                print values
+    
         elif choice == 'plotAcc':
             print 'ploting Accelerometers values'
             acc.plotLogValues()
@@ -104,6 +113,12 @@ def utilsIMU():
             print 'logging additional Magnetometes values'
             mag.logValues(runningtime = 60, sleep = 0.1, add = True)
         
+        elif choice == 'printMag':
+            print 'print Magnetometers values'
+            while True:
+                values = mag.getMag()
+                print values
+                
         elif choice == 'plotMag':
             print 'ploting Magnetometers values'
             mag.plotLogValues()
@@ -112,11 +127,19 @@ def utilsIMU():
             print 'calibrating magnetometers'
             mag.calibrate()
         
-        
+ 
+       
+        elif choice == 'printGyr':
+            print 'print gyrometers values'
+            while True:
+                values = gyr.getGyr()
+                print values
         
         elif choice == 'calGyr':
             print 'calibrating gyrometers'
             gyr.calibrate()
+
+
         
         elif choice == 'logIMU':
             logIMU(print_ = False, log = True)
