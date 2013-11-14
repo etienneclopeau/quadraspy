@@ -19,6 +19,7 @@ except :
     choice1 = None
     choice2 = None
 
+#sudo python -m cProfile -s time utils.py 1 perfoIMU > _resProfile
 
 
 def utils():

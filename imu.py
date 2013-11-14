@@ -156,6 +156,7 @@ def logIMU():
         hx,hy,hz = mag.getMag()
         gx,gy,gz = gyr.getGyr()
         phi,theta,psi = imu.update((ax,ay,az),(hx,hy,hz),(gx,gy,gz))
+        print '%10.5f %10.5f %10.5f'%(degrees(phi),degrees(theta),degrees(psi))
         #imu1.update([1,0,0],[0,1,1],[0,0,0])
         f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
     f.close()
