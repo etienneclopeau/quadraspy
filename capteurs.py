@@ -36,8 +36,8 @@ class Acc(adxl345):
 
     def plotLogValues( self ):
         Tv = getData( fileLogAcc)
-	plot(Tv)
-	
+        plot(Tv)
+    
                 
     def calibrate(self):
         Th = getData(fileLogAcc)
@@ -72,7 +72,7 @@ class Mag(hmc5883l):
 
     def plotLogValues( self ):
         Tv = getData( fileLogMag)
-	plot(Tv)
+        plot(Tv)
                 
     def calibrate(self):
         Th = getData(fileLogMag)
