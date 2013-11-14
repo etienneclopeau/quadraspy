@@ -64,6 +64,10 @@ class Motors():
         self.motor3 = Motor(PWMservo,22)
         self.motor4 = Motor(PWMservo,23)
         
+        self.motor1.setSpeed(0.)
+        self.motor2.setSpeed(0.)
+        self.motor3.setSpeed(0.)
+        self.motor4.setSpeed(0.)
         
     def setMotorsSpeed(self, p):
         """ 
