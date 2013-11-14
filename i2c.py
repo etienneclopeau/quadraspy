@@ -20,7 +20,7 @@ except:
         def write_byte_data(self,a,b,c):
             pass
         def read_byte_data(self,a,b):
-            pass
+            return 1
     bus = noSmbus()
 
 

@@ -5,8 +5,18 @@ Created on Thu Oct 17 13:56:55 2013
 @author: clopeau
 """
 import time
-from RPIO import PWM
-PWMservo = PWM.Servo(dma_channel=0, subcycle_time_us=20000, pulse_incr_us=1)
+try :
+    from RPIO import PWM
+    PWMservo = PWM.Servo(dma_channel=0, subcycle_time_us=20000, pulse_incr_us=1)
+
+except:
+    print 'Warning: RPIO not availabe'
+    class noRPIO():
+        def __init__(self):
+            pass
+        def set_servo(self):
+            pass
+    PWMservo = noRPIO()
 
 class Motor():
     def __init__(self,PWMservo , pin):
