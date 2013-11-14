@@ -104,24 +104,36 @@ class i2c:
         return output        
         
     def readBytesListU(self, reg, length):
-        output = []
         
-        i = 0
-        while i < length:
-            output.append(self.readU8(reg + i))
-            i += 1
-            
-        return output
+        return read_i2c_block_data(self.address, reg, length)        
+#        output = []
+#        
+#        i = 0
+#        while i < length:
+#            output.append(self.readU8(reg + i))
+#            i += 1
+#            
+#        return output
 
     def readBytesListS(self, reg, length):
-        output = []
-        
-        i = 0
-        while i < length:
-            output.append(self.readS8(reg + i))
-            i += 1
-            
-        return output        
+
+        resU = read_i2c_block_data(self.address, reg, length)        
+        resS = list()
+        for r in resU :       
+            if r > 127:
+                resS.append(r - 256)
+            else:
+                resS.append(r)
+        return resS
+
+#        output = []
+#        
+#        i = 0
+#        while i < length:
+#            output.append(self.readS8(reg + i))
+#            i += 1
+#            
+#        return output        
     
     def writeList(self, reg, list):
         # Writes an array of bytes using I2C format"
