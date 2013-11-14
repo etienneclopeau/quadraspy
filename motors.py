@@ -65,7 +65,7 @@ class Motors():
         self.motor4 = Motor(PWMservo,23)
         
         
-    def setMotorsSpeed(p):
+    def setMotorsSpeed(self, p):
         """ 
         p is array 2*2 of real in [0,1]"""
         self.motor1.setSpeed(p[0,0])
