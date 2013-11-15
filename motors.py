@@ -55,7 +55,7 @@ class Motor():
         while v < 1:
             v += 0.01
             self.setSpeed(v)
-            time.sleep(0.1)
+            time.sleep(0.5)
         time.sleep(2)
         while v > 0:
             v -= 0.01
