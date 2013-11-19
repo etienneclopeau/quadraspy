@@ -25,6 +25,7 @@ cdef class IMU:
     cdef double gyr_b1
     cdef double gyr_b2
     cdef double tbefore
+    cdef bool log
     
     #@cython.boundscheck(False) # turn off boundscheck for this function
     @cython.locals(
@@ -40,7 +41,7 @@ cdef class IMU:
                    twoearth_magnetic_field_zquat=np.ndarray,
                    twomag_x=cython.double, twomag_y=cython.double, twomag_z=cython.double,
                    norm = cython.double,
-		   f_1=cython.double,f_2=cython.double,f_3=cython.double,f_4=cython.double,
+                   f_1=cython.double,f_2=cython.double,f_3=cython.double,f_4=cython.double,
                    f_5=cython.double,f_6=cython.double,
                    J_11or24=cython.double,J_12or23=cython.double,J_13or22=cython.double,
                    J_14or21=cython.double,J_32=cython.double,J_33=cython.double,J_41=cython.double,
@@ -51,6 +52,7 @@ cdef class IMU:
                    quatHatDot_1=cython.double,quatHatDot_2=cython.double,
                    quatHatDot_3=cython.double,quatHatDot_4=cython.double,
                    gyr_err=np.ndarray,
+                   gyr = np.ndarray,
                    quatDot_omega_1=cython.double,quatDot_omega_2=cython.double,
                    quatDot_omega_3=cython.double,quatDot_omega_4=cython.double,
                    h_x=cython.double,h_y=cython.double,h_z=cython.double,
