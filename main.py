@@ -10,11 +10,16 @@ from time import sleep,time
 from imu import IMU
 from capteurs import getCapteurs
 from motors import Motors
+from pid import PID
 
 
 imu = IMU()
 acc, mag, gyr = getCapteurs()
 motors = Motors()
+pid_rol = PID(1,0,1)
+pid_pitch = PID(1,0,1)
+pid_yaw = PID(1,0,1)
+
 
 #convegence de l'IMU
 for i in range(1000):
@@ -27,12 +32,19 @@ lateral0 = array([[ 1,-1],
 pivot0 =   array([[ 1,-1],
                   [-1, 1]])
                   
-def respectAngles(alphac=0.,betac=0.,phic=0.):
-    da = alpha - alphac
-    db = beta - betac
-    dp = phi - phic
-    
-    dmotors = da*longi0 + db*lateral0 + dp*pivot0
+#def respectAngles(rol_c=0.,pitch_c=0.,yaw_c=0.):
+#    regul_rol = pid_rol(rol, rol_c)
+#    if regul_rol > 0.5 : da = 0.5
+#    if regul_rol < 0. : da = 0.
+#    regul_pitch = pid_pitch(pitch, pitch_c)
+#    if regul_pitch > 0.5 : da = 0.5
+#    if regul_pitch < 0. : da = 0.
+#    regul_yaw = pid_yaw(yaw, yaw_c)
+#    if regul_yaw > 0.5 : da = 0.5
+#    if regul_yaw < 0. : da = 0.
+#    
+#    dmotors = (regul_rol*longi0 + 1) * (regul_pitch*lateral0 + 1) * (regul_yaw*pivot0 + 1)
+#    return dmotors
     
 def setTotalPower(altc = 1.):
     dalt = alt - altc    
@@ -45,17 +57,50 @@ def getPower(option = 'test'):
 
 def getAttitudeRegulation(option = 'test'):
     if option == 'test':
-        return array([[ 0,0],
-                      [ 0,0]])
-    else: return array([[ 0,0],
-                       [ 0,0]])
+        return array([[ 1,1],
+                      [ 1,1]])
+    elif option == 'stayHorizontal':
+        regul_rol = pid_rol(rol, rol_c)
+        if regul_rol > 0.5 : da = 0.5
+        if regul_rol < 0. : da = 0.
+        regul_pitch = pid_pitch(pitch, pitch_c)
+        if regul_pitch > 0.5 : da = 0.5
+        if regul_pitch < 0. : da = 0.
+        regul_yaw = pid_yaw(yaw, yaw_c)
+        if regul_yaw > 0.5 : da = 0.5
+        if regul_yaw < 0. : da = 0.
+        
+        dmotors = (regul_rol*longi0 + 1) * (regul_pitch*lateral0 + 1) * (regul_yaw*pivot0 + 1)
+
+    else: return array([[ 1,1],
+                        [ 1,1]])
 
 def getDistributedPower():
     
     power = getPower()
     equilibration = getAttitudeRegulation()
     
-    return equilibration + power
+    return equilibration * power
+    
+
+def testPdecolage():
+    """ trouver la puissance de decolage CTRL-C pour couper"""
+    p = array([[0.,0.],
+               [0.,0.]])
+    while True:
+        p = p + 0.005
+        print p
+        motors.setMotorsSpeed(p)
+        time.sleep(1)
+
+def teststabilite(p):
+    """ test stabilite CTRL-C pour couper"""
+    p = p * array([[1.,1.],
+                   [1.,1.]])
+    while True:
+        equilibration = getAttitudeRegulation(option = 'stayHorizontal')
+        peq = p*equilibration 
+        motors.setMotorsSpeed(peq)
     
 
 if __name__ == "__main__":
