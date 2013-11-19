@@ -4,7 +4,8 @@ Created on Tue Oct 15 16:07:31 2013
 
 @author: clopeau
 """
-import time
+
+from time import gmtime, strftime, time
 from numpy import   array,  sqrt,zeros,cross,arctan,arcsin,radians,degrees
 from numpy.linalg import norm as npnorm
 from capteurs import getCapteurs
@@ -15,9 +16,17 @@ def conj(q):
 class IMU():
     """class IMU
     based on http:#www.x-io.co.uk/res/doc/madgwick_internal_report.pdf
+    hearth frame:
+        z: vertical vers le haut
+        x: horizontal aligned with magnetic field
+        y; complete
+    euler definition and order
+    psi: rotation around z
+    theta: rotatioin around y
+    phi: rotation around x
     """
     
-    def __init__(self):
+    def __init__(self, log = True):
         self.quat0 = 1.
         self.quat1 = 0.
         self.quat2 = 0.
@@ -27,14 +36,17 @@ class IMU():
         self.gyr_b0 = 0
         self.gyr_b1 = 0
         self.gyr_b2 = 0 # estimated bias of gyrometers
-        self.tbefore = time.time()
+        self.tbefore = time()
+        self.log = log
+        logFile = strftime("_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
+        self.logFile = open(logFile,'w')
 
 
 
     def update(self, acc,mag,gyr):
         """acc, gyr, mag are array(3) mesurement of acceleration, angular rates and magnetic field
         """
-        tcurrent = time.time()
+        tcurrent = time()
         deltat = tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
         gyroMeasError = 3.14159265358979 * (10.0 / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
         gyroMeasDrift = 3.14159265358979 * (0.2 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
@@ -109,18 +121,18 @@ class IMU():
         
         gyr_ba += gyr_err * deltat * zeta
         self.gyr_b0, self.gyr_b1, self.gyr_b2 = gyr_ba[0],gyr_ba[1],gyr_ba[2]
-        gyr -= gyr_ba
+        gyrc -= gyr_ba
         # compute the quaternion rate measured by gyroscopes
-        quatDot_omega_1 = -halfquat[1] * gyr[0] - halfquat[2] * gyr[1] - halfquat[3] * gyr[2]
-        quatDot_omega_2 = halfquat[0] * gyr[0] + halfquat[2] * gyr[2] - halfquat[3] * gyr[1]
-        quatDot_omega_3 = halfquat[0] * gyr[1] - halfquat[1] * gyr[2] + halfquat[3] * gyr[0]
-        quatDot_omega_4 = halfquat[0] * gyr[2] + halfquat[1] * gyr[1] - halfquat[2] * gyr[0]
+        quatDot_omega_1 = -halfquat[1] * gyrc[0] - halfquat[2] * gyrc[1] - halfquat[3] * gyrc[2]
+        quatDot_omega_2 = halfquat[0] * gyrc[0] + halfquat[2] * gyrc[2] - halfquat[3] * gyrc[1]
+        quatDot_omega_3 = halfquat[0] * gyrc[1] - halfquat[1] * gyrc[2] + halfquat[3] * gyrc[0]
+        quatDot_omega_4 = halfquat[0] * gyrc[2] + halfquat[1] * gyrc[1] - halfquat[2] * gyrc[0]
         # compute then integrate the estimated quaternion rate
         self.quat0 += (quatDot_omega_1 - (beta * quatHatDot_1)) * deltat
         self.quat1 += (quatDot_omega_2 - (beta * quatHatDot_2)) * deltat
         self.quat2 += (quatDot_omega_3 - (beta * quatHatDot_3)) * deltat
         self.quat3 += (quatDot_omega_4 - (beta * quatHatDot_4)) * deltat
-        # normalise quaternion
+        # normalise quaternion 
         norm = sqrt(self.quat0*self.quat0+self.quat1*self.quat1+self.quat2*self.quat2+self.quat3*self.quat3)
         self.quat0 = self.quat0/norm 
         self.quat1 = self.quat1/norm 
@@ -137,18 +149,26 @@ class IMU():
         
         self.tbefore = tcurrent
 
-        phi = arctan(2.*(self.quat0*self.quat1+self.quat2*self.quat3)/(1-2*(self.quat1**2+self.quat2**2)))
-        theta = arcsin(2*(self.quat0*self.quat2-self.quat3*self.quat1))
-        psi = arctan(2.*(self.quat0*self.quat3+self.quat1*self.quat2)/(1-2*(self.quat2**2+self.quat3**2)))
+#        phi = arctan(2.*(self.quat0*self.quat1+self.quat2*self.quat3)/(1-2*(self.quat1**2+self.quat2**2)))
+#        theta = arcsin(2*(self.quat0*self.quat2-self.quat3*self.quat1))
+#        psi = arctan(2.*(self.quat0*self.quat3+self.quat1*self.quat2)/(1-2*(self.quat2**2+self.quat3**2)))
+        psi = arctan2(2.*(self.quat1*self.quat2-self.quat0*self.quat3), 2.*(self.quat0**2+self.quat1**2)-1.)
+        theta = -arcsin(2.*(self.quat1*self.quat3+self.quat0*self.quat2))
+        phi = arctan2(2.*(self.quat2*self.quat3-self.quat0*self.quat1) , 2.*(self.quat0**2+self.quat3**2)-1.)
         #print phi,theta,psi
+        
+        if self.log : self.logFile.write('%s '*26+'\n'%(tcurrent,deltat,acc ,mag,gyr,
+                                                 gyrc, gyr_ba, 
+                                                 self.earth_magnetic_field_x,self.earth_magnetic_field_z ,   
+                                                 quat,psi,theta,phi))
+        
         return phi,theta,psi
 
 
 def logIMU(print_ = True, log = False):
     acc, mag, gyr = getCapteurs()
-    imu = IMU()
+    imu = IMU(log = log)
     i=0
-    if log: f = open('log_IMU','w')
     while True:
         i+=1
         print i
@@ -157,25 +177,23 @@ def logIMU(print_ = True, log = False):
         gx,gy,gz = gyr.getGyr()
         phi,theta,psi = imu.update((ax,ay,az),(hx,hy,hz),(gx,gy,gz))
         if print_ : print '%10.7f %10.7f %10.7f'%(degrees(phi),degrees(theta),degrees(psi))
-        if log : f.write('%s %s %s %s %s %s %s %s %s %s %s %s\n'%(ax,ay,az,hx,hy,hz,gx,gy,gz,phi,theta,psi))
-    if log : f.close()
     
 def timeIMU(niter = 1000):
     acc, mag, gyr = getCapteurs()
     imu = IMU()
     i=0
-    t0 = time.time()
+    t0 = time()
     while i < niter:
         i+=1
         print i
         phi,theta,psi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
-    print time.time() - t0
+    print time() - t0
 
-def plotIMU():
+def plotIMU(fileName = '_log_IMU'):
     from mpl_toolkits.mplot3d import Axes3D
     import matplotlib.pyplot as plt
 
-    f=open('log_IMU')
+    f=open(fileName)
     Tlog = list()
     for line in f:
         Tlog.append([float(a) for a in line.split()])
@@ -198,9 +216,10 @@ def quat2matrix(quat):
     q2=quat[2]
     q3=quat[3]
     
-    mat = array([[q0**2+q1**2-q2**2-q3**2, 2*(q1*q2-q0*q3)         ,2*(q0*q2+q1*q3)],
-                 [2*(q1*q2+q0*q3)        , q0**2-q1**2+q2**2-q3**2 ,2*(q2*q3-q0*q1)],
-                 [2*(q1*q3-q0*q2)        , 2*(q0*q1+q2*q3)         ,q0**2-q1**2-q2**2+q3**2]])
+    mat = array([[2*q0**2 - 1 + 2*q1**2, 2*(q1*q2 + q0*q3)     ,2*(q1*q3 - q0*q2)],
+                 [2*(q1*q2 - q0*q3)    , 2*q0**2 - 1 + 2*q2**2 ,2*(q2*q3 + q0*q1)],
+                 [2*(q1*q3 + q0*q2)    , 2*(q2*q3 - q0*q1)     ,2*q0**2 - 1 + 2*q3**2]])
+                 
     return mat
 
 def plotIMU3d():
