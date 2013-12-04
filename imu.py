@@ -6,7 +6,7 @@ Created on Tue Oct 15 16:07:31 2013
 """
 
 from time import gmtime, strftime, time
-from numpy import   array,  sqrt,zeros,cross,arctan,arcsin,radians,degrees
+from numpy import   array,  sqrt,zeros,cross,arctan,arcsin,radians,degrees,arctan2
 from numpy.linalg import norm as npnorm
 from capteurs import getCapteurs
  
