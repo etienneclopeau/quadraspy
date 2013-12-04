@@ -121,7 +121,7 @@ class IMU():
         
         gyr_ba += gyr_err * deltat * zeta
         self.gyr_b0, self.gyr_b1, self.gyr_b2 = gyr_ba[0],gyr_ba[1],gyr_ba[2]
-        gyrc -= gyr_ba
+        gyrc = gyr-gyr_ba
         # compute the quaternion rate measured by gyroscopes
         quatDot_omega_1 = -halfquat[1] * gyrc[0] - halfquat[2] * gyrc[1] - halfquat[3] * gyrc[2]
         quatDot_omega_2 = halfquat[0] * gyrc[0] + halfquat[2] * gyrc[2] - halfquat[3] * gyrc[1]
