@@ -162,7 +162,7 @@ class IMU():
                                                  self.earth_magnetic_field_x,self.earth_magnetic_field_z ,   
                                                  quat,psi,theta,phi))
         
-        return phi,theta,psi
+        return psi,theta,phi
 
 
 def logIMU(print_ = True, log = False):
@@ -175,8 +175,8 @@ def logIMU(print_ = True, log = False):
         ax,ay,az = acc.getAcc()
         hx,hy,hz = mag.getMag()
         gx,gy,gz = gyr.getGyr()
-        phi,theta,psi = imu.update((ax,ay,az),(hx,hy,hz),(gx,gy,gz))
-        if print_ : print '%10.7f %10.7f %10.7f'%(degrees(phi),degrees(theta),degrees(psi))
+        psi,theta,phi = imu.update((ax,ay,az),(hx,hy,hz),(gx,gy,gz))
+        if print_ : print '%10.7f %10.7f %10.7f'%(degrees(psi),degrees(theta),degrees(phi))
     
 def timeIMU(niter = 1000):
     acc, mag, gyr = getCapteurs()
@@ -186,7 +186,7 @@ def timeIMU(niter = 1000):
     while i < niter:
         i+=1
         print i
-        phi,theta,psi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
+        psi,theta,phi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
     print time() - t0
 
 def plotIMU(fileName = '_log_IMU'):
@@ -282,7 +282,7 @@ def plotIMU3d_2():
     return
 
     while True:
-        phi,theta,psi = imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
+        psi,theta,phi= imu.update(acc.getAcc(),mag.getMag(),gyr.getGyr())
         b.rotate(degrees(phi),1,0,0,local = True)
         b.rotate(degrees(theta),0,0,1,local = True)
         b.rotate(degrees(psi),0,1,0,local = True)

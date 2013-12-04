@@ -155,7 +155,7 @@ class CentralWidget(QWidget):
             Twy.append(wy)
             Twz.append(wz)
             
-            phi,theta,psi = imu.update([accx,accy,accz],[hx,hy,hz],[wx,wy,wz])
+            psi,theta,phi = imu.update([accx,accy,accz],[hx,hy,hz],[wx,wy,wz])
             Tphi.append(phi)
             Ttheta.append(theta)
             Tpsi.append(psi)
