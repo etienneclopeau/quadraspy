@@ -25,7 +25,7 @@ cdef class IMU:
     cdef double gyr_b1
     cdef double gyr_b2
     cdef double tbefore
-    cdef bool log
+    cdef bint log
     
     #@cython.boundscheck(False) # turn off boundscheck for this function
     @cython.locals(
@@ -58,61 +58,7 @@ cdef class IMU:
                    h_x=cython.double,h_y=cython.double,h_z=cython.double,
                    phi=cython.double,theta=cython.double,psi=cython.double )
     cpdef tuple update(self, np.ndarray[double, ndim=1] acc, np.ndarray[double, ndim=1] mag, np.ndarray[double, ndim=1] gyr)
-#        cdef:
-#            double tcurrent
-#            double deltat
-#            double gyroMeasError
-#            double gyroMeasDrift
-#            double beta
-#            double zeta
-#            #np.ndarray[np.double_t, dim = 1 ] halfquat
-#            #np.ndarray[np.double_t, dim = 1 ]twoquat
-#            double twoearth_magnetic_field_x
-#            double twoearth_magnetic_field_z
-#            #np.ndarray[np.double_t, dim = 1 ] twoearth_magnetic_field_xquat
-#            #np.ndarray[np.double_t, dim = 1 ] twoearth_magnetic_field_zquat
-#            double twomag_x
-#            double twomag_y
-#            double twomag_z
-#            double f_1
-#            double f_2
-#            double f_3
-#            double f_4
-#            double f_5
-#            double f_6
-#            double J_11or24
-#            double J_12or23
-#            double J_13or22
-#            double J_14or21
-#            double J_32
-#            double J_33
-#            double J_41
-#            double J_42
-#            double J_43
-#            double J_44
-#            double J_51
-#            double J_52
-#            double J_53
-#            double J_54
-#            double J_61
-#            double J_62
-#            double J_63
-#            double J_64
-#            double quatHatDot_1
-#            double quatHatDot_2
-#            double quatHatDot_3
-#            double quatHatDot_4
-#            #np.ndarray[np.double_t, dim = 1 ] gyr_err=np.ndarray,
-#            double quatDot_omega_1
-#            double quatDot_omega_2
-#            double quatDot_omega_3
-#            double quatDot_omega_4
-#            double h_x
-#            double h_y
-#            double h_z
-#            double phi
-#            double theta
-#            double psi
+
 
 @cython.locals(imu=IMU,
                i = cython.int, t0 = cython.double,
