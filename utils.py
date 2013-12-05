@@ -149,7 +149,8 @@ def utilsIMU():
             logIMU(print_ = True, log = False)
                 
         elif choice == 'plotIMU':
-            plotIMU()
+            fileName = raw_input('please set the fileName\n')
+            plotIMU(fileName)
             
         elif choice == 'perfoIMU':
             timeIMU(niter = 1000)
