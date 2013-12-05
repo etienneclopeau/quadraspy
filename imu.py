@@ -157,7 +157,13 @@ class IMU():
         phi = arctan2(2.*(self.quat2*self.quat3-self.quat0*self.quat1) , 2.*(self.quat0**2+self.quat3**2)-1.)
         #print phi,theta,psi
         
-        if self.log : self.logFile.write('%s '*26+'\n'%(tcurrent,deltat,acc ,mag,gyr,
+        if self.log :
+            print tcurrent,deltat,acc ,mag,gyr,
+                                                 gyrc, gyr_ba, 
+                                                 self.earth_magnetic_field_x,self.earth_magnetic_field_z ,   
+                                                 self.quat0,self.quat1,self.quat2,self.quat3,
+                                                 psi,theta,phi
+            self.logFile.write('%s '*26+'\n'%(tcurrent,deltat,acc ,mag,gyr,
                                                  gyrc, gyr_ba, 
                                                  self.earth_magnetic_field_x,self.earth_magnetic_field_z ,   
                                                  self.quat0,self.quat1,self.quat2,self.quat3,
