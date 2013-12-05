@@ -158,11 +158,7 @@ class IMU():
         #print phi,theta,psi
         
         if self.log :
-            print tcurrent,deltat,acc ,mag,gyr, \
-                                                 gyrc, gyr_ba,   \
-                                                 self.earth_magnetic_field_x,self.earth_magnetic_field_z ,    \
-                                                 self.quat0,self.quat1,self.quat2,self.quat3,  \
-                                                 psi,theta,phi
+            
             self.logFile.write(('%s '*26+'\n')%(tcurrent,deltat,
                                               acc[0],acc[1],acc[2],
                                               mag[0],mag[1],mag[2],
