@@ -163,15 +163,15 @@ class IMU():
                                                  self.earth_magnetic_field_x,self.earth_magnetic_field_z ,    \
                                                  self.quat0,self.quat1,self.quat2,self.quat3,  \
                                                  psi,theta,phi
-            self.logFile.write('%s '*26+'\n'%(tcurrent,deltat,
+            self.logFile.write(('%s '*26+'\n')%(tcurrent,deltat,
                                               acc[0],acc[1],acc[2],
                                               mag[0],mag[1],mag[2],
                                               gyr[0],gyr[1],gyr[2],
                                               gyrc[0],gyrc[1],gyrc[2],
                                               gyr_ba[0],gyr_ba[1],gyr_ba[2], 
-                                                 self.earth_magnetic_field_x,self.earth_magnetic_field_z ,   
-                                                 self.quat0,self.quat1,self.quat2,self.quat3,
-                                                 psi,theta,phi))
+                                              self.earth_magnetic_field_x,self.earth_magnetic_field_z ,   
+                                              self.quat0,self.quat1,self.quat2,self.quat3,
+                                              psi,theta,phi))
         
         return psi,theta,phi
 
