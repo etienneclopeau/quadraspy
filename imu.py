@@ -38,7 +38,7 @@ class IMU():
         self.gyr_b2 = 0 # estimated bias of gyrometers
         self.tbefore = time()
         self.log = log
-        logFile = strftime("_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
+        logFile = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
         self.logFile = open(logFile,'w')
 
 
@@ -152,9 +152,14 @@ class IMU():
 #        phi = arctan(2.*(self.quat0*self.quat1+self.quat2*self.quat3)/(1-2*(self.quat1**2+self.quat2**2)))
 #        theta = arcsin(2*(self.quat0*self.quat2-self.quat3*self.quat1))
 #        psi = arctan(2.*(self.quat0*self.quat3+self.quat1*self.quat2)/(1-2*(self.quat2**2+self.quat3**2)))
-        psi = arctan2(2.*(self.quat1*self.quat2-self.quat0*self.quat3), 2.*(self.quat0**2+self.quat1**2)-1.)
-        theta = -arcsin(2.*(self.quat1*self.quat3+self.quat0*self.quat2))
-        phi = arctan2(2.*(self.quat2*self.quat3-self.quat0*self.quat1) , 2.*(self.quat0**2+self.quat3**2)-1.)
+        
+        quat0=self.quat0
+        quat1=-self.quat1
+        quat2=-self.quat2
+        quat3=-self.quat3
+        psi = arctan2(2.*(quat1*quat2-quat0*quat3), 2.*(quat0**2+quat1**2)-1.)
+        theta = -arcsin(2.*(quat1*quat3+quat0*quat2))
+        phi = arctan2(2.*(quat2*quat3-quat0*quat1) , 2.*(quat0**2+quat3**2)-1.)
         #print phi,theta,psi
         
         if self.log :
@@ -209,11 +214,11 @@ def plotIMU(fileName = '_log_IMU'):
     print Tlog[:,2]
     fig2 = plt.figure()
     ax = fig2.add_subplot(311)
-    ax.plot(degrees(Tlog[:,9]))
+    ax.plot(Tlog[:,0],degrees(Tlog[:,-3]))
     ax = fig2.add_subplot(312)
-    ax.plot(degrees(Tlog[:,10]))
+    ax.plot(Tlog[:,0],degrees(Tlog[:,-2]))
     ax = fig2.add_subplot(313)
-    ax.plot(degrees(Tlog[:,11]))
+    ax.plot(Tlog[:,0],degrees(Tlog[:,-1]))
 
     plt.show()
 
