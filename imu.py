@@ -178,7 +178,7 @@ def logIMU(print_ = True, log = False):
     i=0
     while True:
         i+=1
-        print i
+        #print i
         ax,ay,az = acc.getAcc()
         hx,hy,hz = mag.getMag()
         gx,gy,gz = gyr.getGyr()
