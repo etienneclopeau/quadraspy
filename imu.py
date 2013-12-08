@@ -33,9 +33,6 @@ class IMU():
         self.quat3 = 0.
         self.earth_magnetic_field_x = 1 # orientation of earth magnetic field in ground coordinates
         self.earth_magnetic_field_z = 0 
-        self.gyr_b0 = 0
-        self.gyr_b1 = 0
-        self.gyr_b2 = 0 # estimated bias of gyrometers
         self.tbefore = time()
         
         logFile = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
@@ -79,7 +76,6 @@ class IMU():
  
         # axulirary variables to avoid reapeated calcualtions
         quata = array([self.quat0,self.quat1,self.quat2,self.quat3])
-        self.gyr_ba = array([self.gyr_b0, self.gyr_b1, self.gyr_b2])
         halfquat = 0.5 * quata
         twoquat = 2.0 * quata
         twoearth_magnetic_field_x = 2.0 * self.earth_magnetic_field_x
@@ -142,8 +138,8 @@ class IMU():
         # compute and remove the gyroscope baises
         
         self.gyr_ba += gyr_err * self.deltat * zeta
-        print self.gyr_ba,gyr_err,self.deltat,zeta
-        self.gyr_b0, self.gyr_b1, self.gyr_b2 = self.gyr_ba[0],self.gyr_ba[1],self.gyr_ba[2]
+        print self.gyr_ba, gyr_err, self.deltat, zeta
+        print  gyr_err* self.deltat* zeta
         self.gyrc = self.gyr-self.gyr_ba
         # compute the quaternion rate measured by gyroscopes
         quatDot_omega_1 = -halfquat[1] * self.gyrc[0] - halfquat[2] * self.gyrc[1] - halfquat[3] * self.gyrc[2]
