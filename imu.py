@@ -187,7 +187,7 @@ class IMU():
         #print phi,theta,psi
         return psi,theta,phi
     
-    def log    
+    def log(self):    
         psi,theta,phi = self.getEuler()          
         self.logFile.write(('%s '*26+'\n')%(self.tcurrent,self.deltat,
                                               self.acc[0],self.acc[1],self.acc[2],
@@ -208,8 +208,11 @@ def logIMU(print_ = True, log = False):
     while True:
         i+=1
         #print i
-        psi,theta,phi = imu.getEuler()
-        if print_ : print '%10.7f %10.7f %10.7f'%(degrees(psi),degrees(theta),degrees(phi))
+        if log:
+            imu.log()
+        if print_:
+            psi,theta,phi = imu.getEuler()
+            print '%10.7f %10.7f %10.7f'%(degrees(psi),degrees(theta),degrees(phi))
         time.sleep(0.1)
 
 def timeIMU(niter = 1000):
