@@ -5,7 +5,7 @@ Created on Tue Oct 15 16:07:31 2013
 @author: clopeau
 """
 import threading
-from time import gmtime, strftime, time
+from time import gmtime, strftime, time, sleep
 from numpy import   array,  sqrt,zeros,cross,arctan,arcsin,radians,degrees,arctan2
 from numpy.linalg import norm as npnorm
 from capteurs import getCapteurs
@@ -213,7 +213,7 @@ def logIMU(print_ = True, log = False):
         if print_:
             psi,theta,phi = imu.getEuler()
             print '%10.7f %10.7f %10.7f'%(degrees(psi),degrees(theta),degrees(phi))
-        time.sleep(0.1)
+        sleep(0.1)
 
 def timeIMU(niter = 1000):
     
@@ -281,7 +281,7 @@ def plotIMU3d():
         vz = ax.plot([0,mat[2,0]],[0,mat[2,1]],[0,mat[2,2]])
         
         plt.draw()
-        time.sleep(0.5)
+        sleep(0.5)
 
 def plotIMU3d_2():
 
@@ -325,7 +325,7 @@ def plotIMU3d_2():
         b.rotate(degrees(theta),0,0,1,local = True)
         b.rotate(degrees(psi),0,1,0,local = True)
 
-        time.sleep(0.5)
+        sleep(0.5)
         
     
     
