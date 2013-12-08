@@ -138,8 +138,8 @@ class IMU():
         # compute and remove the gyroscope baises
         
         self.gyr_ba += gyr_err * self.deltat * zeta
-        print self.gyr_ba, gyr_err, self.deltat, zeta
-        print  gyr_err* self.deltat* zeta
+        # print self.gyr_ba, gyr_err, self.deltat, zeta
+        # print  gyr_err* self.deltat* zeta
         self.gyrc = self.gyr-self.gyr_ba
         # compute the quaternion rate measured by gyroscopes
         quatDot_omega_1 = -halfquat[1] * self.gyrc[0] - halfquat[2] * self.gyrc[1] - halfquat[3] * self.gyrc[2]
