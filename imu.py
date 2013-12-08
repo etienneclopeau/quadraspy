@@ -37,7 +37,7 @@ class IMU():
         self.gyr_b1 = 0
         self.gyr_b2 = 0 # estimated bias of gyrometers
         self.tbefore = time()
-        self.log = log
+        
         logFile = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
         self.logFile = open(logFile,'w')
         self.accelerometer, self.magnetometer, self.gyrometer = getCapteurs()
@@ -142,6 +142,7 @@ class IMU():
         # compute and remove the gyroscope baises
         
         self.gyr_ba += gyr_err * self.deltat * zeta
+        print self.gyr_ba
         self.gyr_b0, self.gyr_b1, self.gyr_b2 = self.gyr_ba[0],self.gyr_ba[1],self.gyr_ba[2]
         self.gyrc = self.gyr-self.gyr_ba
         # compute the quaternion rate measured by gyroscopes
@@ -244,6 +245,16 @@ def plotIMU(fileName = '_log_IMU'):
     ax.plot(Tlog[:,0],degrees(Tlog[:,-2]))
     ax = fig2.add_subplot(313)
     ax.plot(Tlog[:,0],degrees(Tlog[:,-1]))
+
+    plt.show()
+
+    fig2 = plt.figure()
+    ax = fig2.add_subplot(311)
+    ax.plot(Tlog[:,0],degrees(Tlog[:,14]))
+    ax = fig2.add_subplot(312)
+    ax.plot(Tlog[:,0],degrees(Tlog[:,15]))
+    ax = fig2.add_subplot(313)
+    ax.plot(Tlog[:,0],degrees(Tlog[:,16]))
 
     plt.show()
 
