@@ -66,7 +66,7 @@ class IMU():
         """
         self.tcurrent = time()
         self.gyr = self.gyrometer.getGyr()
-        self.acc = accelerometer.getAcc()
+        self.acc = self.accelerometer.getAcc()
         self.mag = self.magnetometer.getMag()
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
