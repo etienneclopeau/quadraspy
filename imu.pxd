@@ -26,14 +26,21 @@ cdef class IMU:
     cdef double gyr_b2
     cdef double tbefore
     cdef bint log
-    
+    cdef bint stop
+    cdef np.ndarray gyr
+    cdef np.ndarray acc
+    cdef np.ndarray mag
+    cdef np.ndarray gyrc
+    cdef np.ndarray gyr_ba
+    cdef double tcurrent
+
     #@cython.boundscheck(False) # turn off boundscheck for this function
     @cython.locals(
-                   tcurrent=cython.double, deltat=cython.double,
+                   #tcurrent=cython.double, deltat=cython.double,
                    gyroMeasError=cython.double,gyroMeasDrift=cython.double,
                    beta=cython.double,zeta=cython.double,
                    quata=np.ndarray,
-                   gyr_ba=np.ndarray,
+                   #gyr_ba=np.ndarray,
                    halfquat=np.ndarray,
                    twoquat=np.ndarray,                   
                    twoearth_magnetic_field_x=cython.double, twoearth_magnetic_field_z=cython.double, 
@@ -52,12 +59,14 @@ cdef class IMU:
                    quatHatDot_1=cython.double,quatHatDot_2=cython.double,
                    quatHatDot_3=cython.double,quatHatDot_4=cython.double,
                    gyr_err=np.ndarray,
-                   gyr = np.ndarray,
                    quatDot_omega_1=cython.double,quatDot_omega_2=cython.double,
                    quatDot_omega_3=cython.double,quatDot_omega_4=cython.double,
                    h_x=cython.double,h_y=cython.double,h_z=cython.double,
                    phi=cython.double,theta=cython.double,psi=cython.double )
-    cpdef tuple update(self, np.ndarray[double, ndim=1] acc, np.ndarray[double, ndim=1] mag, np.ndarray[double, ndim=1] gyr)
+    cpdef update(self)
+    cpdef start(self)
+    cpdef run(self)
+    cpdef stop(self)
 
 
 @cython.locals(imu=IMU,
