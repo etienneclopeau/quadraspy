@@ -142,7 +142,7 @@ class IMU():
         # compute and remove the gyroscope baises
         
         self.gyr_ba += gyr_err * self.deltat * zeta
-        print self.gyr_ba
+        print self.gyr_ba,gyr_err,self.deltat,zeta
         self.gyr_b0, self.gyr_b1, self.gyr_b2 = self.gyr_ba[0],self.gyr_ba[1],self.gyr_ba[2]
         self.gyrc = self.gyr-self.gyr_ba
         # compute the quaternion rate measured by gyroscopes
