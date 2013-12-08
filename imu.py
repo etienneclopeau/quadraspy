@@ -71,7 +71,7 @@ class IMU():
         self.mag = self.magnetometer.getMag()
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
-        gyroMeasError = 3.14159265358979 * (10.0 / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
+        gyroMeasError = 3.14159265358979 * (5. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
         gyroMeasDrift = 3.14159265358979 * (0.2 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
         beta = sqrt(3.0 / 4.0) * gyroMeasError # compute beta
         zeta = sqrt(3.0 / 4.0) * gyroMeasDrift # compute zeta
