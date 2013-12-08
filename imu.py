@@ -102,9 +102,9 @@ class IMU():
         f_1 = twoquat[1] * self.quat3 - twoquat[0] * self.quat2 - self.acc[0]
         f_2 = twoquat[0] * self.quat1 + twoquat[2] * self.quat3 - self.acc[1]
         f_3 = 1.0 - twoquat[1] * self.quat1 - twoquat[2] * self.quat2 - self.acc[2]
-        f_4 = twoearth_magnetic_field_x * (0.5 - self.quat2 * self.quat2 - self.quat3 * self.quat3) + twoearth_magnetic_field_z * (self.quat1*self.quat3 - self.quat0*self.quat2) - mag[0]
-        f_5 = twoearth_magnetic_field_x * (self.quat1 * self.quat2 - self.quat0 * self.quat3) + twoearth_magnetic_field_z * (self.quat0 * self.quat1 + self.quat2 * self.quat3) - mag[1]
-        f_6 = twoearth_magnetic_field_x * (self.quat0*self.quat2 + self.quat1*self.quat3) + twoearth_magnetic_field_z * (0.5 - self.quat1 * self.quat1 - self.quat2 * self.quat2) - mag[2]
+        f_4 = twoearth_magnetic_field_x * (0.5 - self.quat2 * self.quat2 - self.quat3 * self.quat3) + twoearth_magnetic_field_z * (self.quat1*self.quat3 - self.quat0*self.quat2) - self.mag[0]
+        f_5 = twoearth_magnetic_field_x * (self.quat1 * self.quat2 - self.quat0 * self.quat3) + twoearth_magnetic_field_z * (self.quat0 * self.quat1 + self.quat2 * self.quat3) - self.mag[1]
+        f_6 = twoearth_magnetic_field_x * (self.quat0*self.quat2 + self.quat1*self.quat3) + twoearth_magnetic_field_z * (0.5 - self.quat1 * self.quat1 - self.quat2 * self.quat2) - self.mag[2]
         J_11or24 = twoquat[2] # J_11 negated in matrix multiplication
         J_12or23 = 2.0 * self.quat3
         J_13or22 = twoquat[0] # J_12 negated in matrix multiplication
