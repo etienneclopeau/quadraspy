@@ -70,19 +70,16 @@ cdef class IMU:
 
 
 @cython.locals(imu=IMU,
-               i = cython.int, t0 = cython.double,
-               ax = cython.double,ay = cython.double,az = cython.double,
-               hx = cython.double,hy = cython.double,hz = cython.double,
-               gx = cython.double,gy = cython.double,gz = cython.double,
+               i = cython.int,
                phi=cython.double,theta=cython.double,psi=cython.double)
-cpdef logIMU()
+cpdef logIMU(bint print_=? , bint log=?)
     
 @cython.locals(imu=IMU,
                i = cython.int, t0 = cython.double,
                phi=cython.double,theta=cython.double,psi=cython.double)
 cpdef timeIMU(int niter =?)
 
-cpdef plotIMU()
+cpdef plotIMU(char* fileName = ?)
 
 cpdef quat2matrix(np.ndarray[np.double_t, ndim = 1 ] quat)
 
