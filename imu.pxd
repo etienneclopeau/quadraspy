@@ -26,7 +26,7 @@ cdef class IMU:
     cdef double gyr_b2
     cdef double tbefore
     #cdef bint log
-    cdef bint stop
+    cdef bint running
     cdef np.ndarray gyr
     cdef np.ndarray acc
     cdef np.ndarray mag
