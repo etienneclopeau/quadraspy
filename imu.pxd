@@ -35,7 +35,6 @@ cdef class IMU:
     cdef np.ndarray gyr_ba
     cdef double tcurrent
     #cdef FILE* logFile
-    logFile
 
     #@cython.boundscheck(False) # turn off boundscheck for this function
     @cython.locals(
