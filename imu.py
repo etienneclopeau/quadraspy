@@ -38,7 +38,7 @@ class IMU():
         logFile = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
         self.logFile = open(logFile,'w')
         self.accelerometer, self.magnetometer, self.gyrometer = getCapteurs()
-        self.stop = False
+        self.running = True
 
 
         self.gyrc = array([0.,0.,0.])
@@ -56,11 +56,11 @@ class IMU():
         self.thread.start()
 
     def run(self):
-        while not self.stop:
+        while self.running:
             self.update()
 
     def stop(self):
-        self.stop = True
+        self.runnning = False
 
     def update(self):
         """updates the quaternions
@@ -255,7 +255,22 @@ def plotIMU(fileName = '_log_IMU'):
     ax.plot(Tlog[:,0],degrees(Tlog[:,15]))
     ax = fig2.add_subplot(313)
     ax.plot(Tlog[:,0],degrees(Tlog[:,16]))
+    plt.show()
 
+    fig2 = plt.figure()
+    ax = fig2.add_subplot(311)
+    ax.plot(Tlog[:,0],degrees(Tlog[:,11]))
+    ax = fig2.add_subplot(312)
+    ax.plot(Tlog[:,0],degrees(Tlog[:,12]))
+    ax = fig2.add_subplot(313)
+    ax.plot(Tlog[:,0],degrees(Tlog[:,13]))
+    plt.show()
+ 
+    fig2 = plt.figure()
+    ax = fig2.add_subplot(211)
+    ax.plot(Tlog[:,0],degrees(Tlog[:,17]))
+    ax = fig2.add_subplot(212)
+    ax.plot(Tlog[:,0],degrees(Tlog[:,18]))
     plt.show()
 
 def quat2matrix(quat):
