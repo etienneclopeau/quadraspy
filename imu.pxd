@@ -5,7 +5,7 @@ Created on Tue Oct 15 16:07:31 2013
 @author: clopeau
 """
 import cython
-#from libc.stdio cimport *
+from libc.stdio cimport *
 import numpy as np
 cimport numpy as np
 
