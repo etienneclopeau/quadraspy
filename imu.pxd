@@ -8,7 +8,7 @@ import cython
 from libc.stdio cimport *
 import numpy as np
 cimport numpy as np
-from capteurs import Acc, Gyr,Mag
+from capteurs cimport Acc, Gyr,Mag
 
 DTYPE = np.float
 ctypedef np.float_t DTYPE_t
@@ -38,9 +38,9 @@ cdef class IMU:
     cdef np.ndarray gyr_ba
     cdef double tcurrent
     cdef object logFile
-    Acc accelerometer
-    Gyr gyrometer
-    Mag magnetometer
+    cdef Acc accelerometer
+    cdef Gyr gyrometer
+    cdef Mag magnetometer
 
     #@cython.boundscheck(False) # turn off boundscheck for this function
     @cython.locals(
