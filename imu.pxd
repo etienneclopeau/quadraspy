@@ -8,7 +8,7 @@ import cython
 from libc.stdio cimport *
 import numpy as np
 cimport numpy as np
-from capteurs cimport Acc, Gyr,Mag
+from capteurs import Acc, Gyr,Mag
 
 DTYPE = np.float
 ctypedef np.float_t DTYPE_t
