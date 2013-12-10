@@ -13,6 +13,7 @@ from capteurs import getCapteurs
 def conj(q):
     return array([q[0],-q[1],-q[2],-q[3]])
 
+
 class IMU():
     """class IMU
     based on http:#www.x-io.co.uk/res/doc/madgwick_internal_report.pdf
