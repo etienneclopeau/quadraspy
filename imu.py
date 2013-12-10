@@ -13,14 +13,7 @@ from capteurs import getCapteurs
 def conj(q):
     return array([q[0],-q[1],-q[2],-q[3]])
 
-class logger():
-    def __init__(self):
-        logFileName = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
-        self.logFile = open(logFileName,'w')
 
-    def log(text):
-        self.logFile.write(text)
- 
 
 class IMU():
     """class IMU
@@ -44,8 +37,8 @@ class IMU():
         self.earth_magnetic_field_z = 0 
         self.tbefore = time()
         
-        
-        self.logFile = logger()
+        logFileName = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
+        self.logFile = open(logFileName,'w')
         self.accelerometer, self.magnetometer, self.gyrometer = getCapteurs()
         self.running = True
 
@@ -199,7 +192,7 @@ class IMU():
     
     def log(self):    
         psi,theta,phi = self.getEuler()          
-        self.logFile.log(('%s '*26+'\n')%(self.tcurrent,self.deltat,
+        self.logFile.write(('%s '*26+'\n')%(self.tcurrent,self.deltat,
                                               self.acc[0],self.acc[1],self.acc[2],
                                               self.mag[0],self.mag[1],self.mag[2],
                                               self.gyr[0],self.gyr[1],self.gyr[2],
