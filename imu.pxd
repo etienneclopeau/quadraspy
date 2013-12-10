@@ -15,6 +15,8 @@ ctypedef np.float_t DTYPE_t
 
 cdef conj(np.ndarray[double, ndim=1] q)
 
+class logger
+
 cdef class IMU:
     cdef double quat0
     cdef double quat1
@@ -34,7 +36,7 @@ cdef class IMU:
     cdef np.ndarray gyrc
     cdef np.ndarray gyr_ba
     cdef double tcurrent
-    cdef FILE* logFile
+    cdef logger logFile
 
     #@cython.boundscheck(False) # turn off boundscheck for this function
     @cython.locals(
