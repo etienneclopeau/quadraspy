@@ -37,6 +37,7 @@ cdef class IMU:
     cdef np.ndarray gyrc
     cdef np.ndarray gyr_ba
     cdef double tcurrent
+    cdef double deltat
     cdef object logFile
     cdef object accelerometer
     cdef object gyrometer
