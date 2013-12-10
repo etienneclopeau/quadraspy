@@ -42,6 +42,7 @@ cdef class IMU:
     cdef object accelerometer
     cdef object gyrometer
     cdef object magnetometer
+    cdef object thread
 
     #@cython.boundscheck(False) # turn off boundscheck for this function
     @cython.locals(
