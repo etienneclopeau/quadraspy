@@ -15,7 +15,7 @@ ctypedef np.float_t DTYPE_t
 
 cdef conj(np.ndarray[double, ndim=1] q)
 
-class logger
+
 
 cdef class IMU:
     cdef double quat0
