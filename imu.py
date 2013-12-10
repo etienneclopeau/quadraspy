@@ -36,8 +36,8 @@ class IMU():
         self.earth_magnetic_field_z = 0 
         self.tbefore = time()
         
-        logFile = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
-        self.logFile = open(logFile,'w')
+        logFileName = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
+        self.logFile = open(logFileName,'w')
         self.accelerometer, self.magnetometer, self.gyrometer = getCapteurs()
         self.running = True
 
