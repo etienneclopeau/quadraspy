@@ -38,9 +38,9 @@ cdef class IMU:
     cdef np.ndarray gyr_ba
     cdef double tcurrent
     cdef object logFile
-    cdef Acc accelerometer
-    cdef Gyr gyrometer
-    cdef Mag magnetometer
+    Acc accelerometer
+    Gyr gyrometer
+    Mag magnetometer
 
     #@cython.boundscheck(False) # turn off boundscheck for this function
     @cython.locals(
