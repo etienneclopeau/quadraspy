@@ -47,9 +47,9 @@ class IMU():
         self.gyr_ba = array([0.,0.,0.])
         self.tcurrent = 0.
         self.deltat = 0.
-        self.acc = (0.,0.,0.)
-        self.gyr = (0.,0.,0.)
-        self.mag = (0.,0.,0.)
+        self.acc = array([0.,0.,0.])
+        self.gyr = array([0.,0.,0.])
+        self.mag = array([0.,0.,0.])
 
         self.start()
 
