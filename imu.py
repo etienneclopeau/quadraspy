@@ -207,7 +207,7 @@ class IMU():
         
 
 
-def logIMU(print_ = True, log = False):
+def logIMU(print_ = True, log = False, sleeping = 0.1):
     imu = IMU(log = log)
     i=0
     while True:
@@ -218,7 +218,7 @@ def logIMU(print_ = True, log = False):
         if print_:
             psi,theta,phi = imu.getEuler()
             print '%10.7f %10.7f %10.7f'%(degrees(psi),degrees(theta),degrees(phi))
-        sleep(0.1)
+        sleep(sleeping)
 
 def timeIMU(niter = 1000):
     

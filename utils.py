@@ -11,6 +11,8 @@ from motors import Motors
 from imu import logIMU,plotIMU,timeIMU
 from numpy import degrees
 
+from time import sleep
+
 import sys
 try:
     choice1 = sys.argv[1]
@@ -96,6 +98,7 @@ def utilsIMU():
             while True:
                 values = acc.getAcc()
                 print values
+                sleep(0.1)
     
         elif choice == 'plotAcc':
             print 'ploting Accelerometers values'
@@ -119,6 +122,7 @@ def utilsIMU():
             while True:
                 values = mag.getMag()
                 print values
+                sleep(0.1)
                 
         elif choice == 'plotMag':
             print 'ploting Magnetometers values'
@@ -135,6 +139,7 @@ def utilsIMU():
             while True:
                 values = gyr.getGyr()
                 print degrees(values)
+                sleep(0.1)
         
         elif choice == 'calGyr':
             print 'calibrating gyrometers'
