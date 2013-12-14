@@ -1,1 +1,42 @@
-0.0162383499677 -0.11500901018 3.28073261891 487.423874818 442.976679127 414.588916629 132.442428135 -96.8858269441 -24.5031275703 
+-1.16681928e-01   1.22478698e-01  -2.59043829e+00   5.52752085e+02 5.21075812e+02   4.48639923e+02   1.45509558e+02  -5.25339048e+01  -1.40101198e+01
+
+3109.88337653
+C:\Python27\lib\site-packages\scipy\optimize\optimize.py:816: RuntimeWarning: di
+vide by zero encountered in double_scalars
+  rhok = 1.0 / (numpy.dot(yk, sk))
+Divide-by-zero encountered: rhok assumed large
+3109.88337651
+Warning: Desired error not necessarily achieved due to precision loss.
+         Current function value: 3109.883377
+         Iterations: 61
+         Function evaluations: 2425
+         Gradient evaluations: 217
+X0 was  (-0.11984776556631192, -0.11697169061743577, -2.5726540110729426, 551.66
+583924288261, 521.17515535439293, 449.28728410734107, 145.62114890273321, -53.15
+3003527257866, -14.621785429225264)
+cost0 7684.54655076
+res [ -1.16681928e-01   1.22478698e-01  -2.59043829e+00   5.52752085e+02
+   5.21075812e+02   4.48639923e+02   1.45509558e+02  -5.25339048e+01
+  -1.40101198e+01]
+  
+  
+  
+  
+  
+  3109.88401435
+C:\Python27\lib\site-packages\scipy\optimize\optimize.py:816: RuntimeWarning: di
+vide by zero encountered in double_scalars
+  rhok = 1.0 / (numpy.dot(yk, sk))
+Divide-by-zero encountered: rhok assumed large
+3109.88401437
+Warning: Desired error not necessarily achieved due to precision loss.
+         Current function value: 3109.884014
+         Iterations: 72
+         Function evaluations: 2802
+         Gradient evaluations: 250
+X0 was  (0, 0, 0, 551.66583924288261, 521.17515535439293, 449.28728410734107, 14
+5.62114890273321, -53.153003527257866, -14.621785429225264)
+cost0 9159.60509039
+res [  1.16461960e-01  -1.22692113e-01   5.51200083e-01   5.52765112e+02
+   5.21074288e+02   4.48637709e+02   1.45520786e+02  -5.25322073e+01
+  -1.40086242e+01]
