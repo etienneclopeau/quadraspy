@@ -173,6 +173,8 @@ def calibratedData(Th, center, evecs):
         
 def distanceToEllipsoid(a,b,c,u,v,w):
     
+    #print '========'
+
     def Ft(t,u,v,w,a,b,c):
         """fonction to minimize to find the projection of point (u,v,w) 
         on Ellipsoide defined by x**2/a**2 + y**2/b**2 + z**2/c**2"""
@@ -183,15 +185,42 @@ def distanceToEllipsoid(a,b,c,u,v,w):
         """derivative of Ft"""
         dF = -2*a**2*u**2/(t+a**2)**3 - 2*b**2*v**2/(t+b**2)**3 - 2*c**2*w**2/(t+c**2)**3
         return dF
-    
-    x0 = max(a*u-u**2,b*v-v**2,c*w-w**2)
+
+    def ddFt(t,u,v,w,a,b,c):
+        """derivative of Ft"""
+        ddF = 6*a**2*u**2/(t+a**2)**4 + 6*b**2*v**2/(t+b**2)**4 + 6*c**2*w**2/(t+c**2)**4
+        return ddF
+
+    #print a,b,c,u,v,w
+
+    flipu=False
+    flipv=False
+    flipw=False
+    if u<0: 
+        u= -u
+        flipu=True
+    if v<0: 
+        v= -v
+        flipv=True
+    if w<0: 
+        w= -w
+        flipw=True
+
+
+    x0 = max(a*u-a**2,b*v-b**2,c*w-c**2)
     #(res,) = so.fmin_bfgs(Ft, x0, fprime=dFt, args=(u,v,w,a,b,c))
-    res = so.root(Ft, x0, jac=dFt, args=(u,v,w,a,b,c))
-    res = res.x[0]
+    res = so.newton(Ft, x0, fprime=dFt, fprime2=ddFt, args=(u,v,w,a,b,c), tol=0.001)
+    #res = so.fsolve(Ft, x0, fprime=dFt, args=(u,v,w,a,b,c))
+    #res = so.anderson(Ft, x0, fprime=dFt, args=(u,v,w,a,b,c))
+    #res = so.root(Ft, x0, args=(u,v,w,a,b,c))
+    #res = res.x[0]
+    #print res
     x = a**2*u/(res+a**2)
     y = b**2*v/(res+b**2)
     z = c**2*w/(res+c**2)
     #print x,y,z
+    #print x,y,z
+    #print norm([x-u,y-v,z-w])
     return norm([x-u,y-v,z-w])
                 
 def ellipsoidFit_DistanceSphere(Th):
@@ -216,7 +245,7 @@ def ellipsoidFit_DistanceSphere(Th):
         center = array([cx,cy,cz])
         r = array([a,b,c])
         
-        Thcal = array([Mat.dot(v-center)/r for v in Th])
+        Thcal = array([Mat.transpose().dot(v-center)/r for v in Th])
         # si les mesures ne sont pas bruitees et la calibration pafaite, tous les points doivent maintenant être sur une sphere de rayon 1        
         
         for point in Thcal:
@@ -241,6 +270,7 @@ def ellipsoidFit_DistanceEllipsoide(Th):
     theta0 = -arcsin(evecs[2,0])
     psi0 = arctan2(evecs[2,1]/cos(theta0),evecs[2,2]/cos(theta0))
     phi0 = arctan2(evecs[1,0]/cos(theta0),evecs[0,0]/cos(theta0))
+    phi0,theta0,psi0 = 0,0,0
     
     
     def costFunction((theta,psi,phi,a,b,c,cx,cy,cz)): 
@@ -253,18 +283,28 @@ def ellipsoidFit_DistanceEllipsoide(Th):
         center = array([cx,cy,cz])
         r = array([a,b,c])
         
-        Thcal = array([Mat.dot(v-center) for v in Th])
+        Thcal = array([Mat.transpose().dot(v-center) for v in Th])
         # si les mesures ne sont pas bruitees et la calibration pafaite, tous les points doivent maintenant être sur une ellipse dont les axes sont aligné sur les axes x,y,z        
-        
+        costs = list()
         for point in Thcal:
-            cost += distanceToEllipsoid(a,b,c,point[0],point[1],point[2])
+            costs.append(distanceToEllipsoid(a,b,c,point[0],point[1],point[2]))
+            #if costs[-1]>1000: raise
+            cost += costs[-1]
         print cost
+
+        # fig2 = plt.figure()
+        # ax = fig2.add_subplot(111)
+        # ax.plot(costs)
+        # plt.show()
+
+
         return cost
     
     x0 = (theta0,psi0,phi0,a0,b0,c0,cx0,cy0,cz0)
     print 'X0',x0
     cost0 = costFunction(x0)
-    res = so.fmin_bfgs(costFunction, x0)
+    res = so.fmin_bfgs(costFunction, x0, disp=True)
+    #res = so.fmin(costFunction, x0)
     print 'X0 was ' , x0
     print 'cost0',cost0
     print 'res',res
@@ -307,10 +347,28 @@ def getCalData(fileName):
 
 if __name__ == "__main__":        
     #logHvalues('maglog.dat',runningtime = 30)    
-    Th = getData('maglog.dat')
-    plot(Th)
-    ellipsoidFit_DistanceSphere(Th)
-#    ellipsoidFit_DistanceEllipsoide(Th)
+    Th = getData('_logMag.dat')
+    #plot(Th)
+#    ellipsoidFit_DistanceSphere(Th)
+    #ellipsoidFit_DistanceEllipsoide(Th)
     
+    theta,psi,phi,a,b,c,cx,cy,cz = [1.16461960e-01 , -1.22692113e-01 ,  5.51200083e-01 ,  5.52765112e+02,
+   5.21074288e+02 ,  4.48637709e+02 ,  1.45520786e+02 , -5.25322073e+01,
+  -1.40086242e+01]
+
+    theta,psi,phi,a,b,c,cx,cy,cz = [-1.16681928e-01 ,  1.22478698e-01 , -2.59043829e+00 ,  5.52752085e+02,
+   5.21075812e+02 ,  4.48639923e+02 ,  1.45509558e+02 , -5.25339048e+01,
+  -1.40101198e+01]
+    theta,psi,phi,a,b,c,cx,cy,cz = [ 0.0162383499677, -0.11500901018, 3.28073261891 ,487.423874818, 442.976679127 ,414.588916629, 132.442428135 ,-96.8858269441, -24.5031275703 ]
+
+    Mat = array(  \
+      [[cos(theta)*cos(phi) , sin(psi)*sin(theta)*cos(phi) - cos(psi)*sin(phi) , cos(psi)*sin(theta)*cos(phi) + sin(psi)*sin(phi)],  \
+       [cos(theta)*sin(phi) , sin(psi)*sin(theta)*sin(phi) + cos(psi)*cos(phi) , cos(psi)*sin(theta)*sin(phi) - sin(psi)*cos(phi)],  \
+       [   -sin(theta)      ,               sin(psi)*cos(theta)                , cos(psi)*cos(theta)] ] )
+    center = array([cx,cy,cz])
+    r = array([a,b,c])
+    Thcal = array([Mat.transpose().dot(v-center) for v in Th])
+    plot(Th,Thcal)
+
     
 
