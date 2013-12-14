@@ -190,7 +190,7 @@ class IMU():
         theta = -arcsin(2.*(quat1*quat3+quat0*quat2))
         phi = arctan2(2.*(quat2*quat3-quat0*quat1) , 2.*(quat0**2+quat3**2)-1.)
         #print phi,theta,psi
-        return psi,theta,phi
+        return float(psi),float(theta),float(phi)
     
     def log(self):    
         psi,theta,phi = self.getEuler()          
