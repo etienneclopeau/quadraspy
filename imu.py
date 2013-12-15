@@ -181,8 +181,8 @@ class IMU():
         accX,accy,accz = self.acc[0],self.acc[1],self.acc[2]
         magX,magy,magz = self.mag[0],self.mag[1],self.mag[2]
         gyrX,gyry,gyrz = self.gyr[0],self.gyr[1],self.gyr[2]
-        return float(accX),float(accy),float(accz),
-               float(magX),float(magy),float(magz),
+        return float(accX),float(accy),float(accz), \
+               float(magX),float(magy),float(magz), \
                float(gyrX),float(gyry),float(gyrz)
     def getEuler(self):
         quat0=self.quat0
