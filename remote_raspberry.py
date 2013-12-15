@@ -1,3 +1,6 @@
+
+#lancer: python -m Pyro4.naming -n 192.168.1.98
+
 import Pyro4
 from imu import IMU
 

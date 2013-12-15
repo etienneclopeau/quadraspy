@@ -177,7 +177,8 @@ class IMU():
         self.tbefore = self.tcurrent
 
         
-
+    def get_raw_data(self):
+        return self.acc,self.mag,self.gyr
     def getEuler(self):
         quat0=self.quat0
         quat1=-self.quat1
@@ -315,7 +316,6 @@ def plotIMU3d():
 
 def plotIMU3d_2():
 
-
     
     imu = IMU()
 
@@ -358,11 +358,132 @@ def plotIMU3d_2():
         sleep(0.5)
         
     
+def liveplot3d(imu):
+
+    from mpl_toolkits.mplot3d import Axes3D
+    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation     
+   
+    fig = plt.figure()
+
+    ax1 = fig.add_subplot(321)
+    ax2 = fig.add_subplot(323)
+    ax3 = fig.add_subplot(325)
+    ax4 = fig.add_subplot(122, projection='3d')
+    # plt.tight_layout()
     
+    linePsi, = ax1.plot([],[])
+    lineTheta, = ax2.plot([],[])
+    linePhi, = ax3.plot([],[])
+    plot3d = ax4.scatter([],[],[], animated=True)
+
+    # ax.set_ylim(-1.1, 1.1)
+    # ax.set_xlim(0, 5)
+    # ax.grid()
+    Tpsi, Tpsi, Tphi = list(),list(),list()
+    def run(data):
+        # update the data
+        psi,theta,phi =data
+        
+        Tpsi.append(psi)
+        Ttheta.append(theta)
+        Tphi.append(phi)
+        x= range(len(Tpsi))
+        # xmin, xmax = ax.get_xlim()
+
+        # if t >= xmax:
+        #     ax.set_xlim(xmin, 2*xmax)
+        #     ax.figure.canvas.draw()
+        lineTheta.set_data(x, Ttheta)
+        linePsi.set_data(x, Ttheta)
+        linePhi.set_data(x, Ttheta)
+        plot3d.set_offsets([Tpsi,Ttheta])
+        plot3d.set_3d_properties(Tphi,'z')
+
+        plt.draw()
+        return linePsi,lineTheta,linePhi,plot3d
+
+    def init():
+        lineTheta.set_data([], [])
+        linePsi.set_data([], [])
+        linePhi.set_data([], [])
+        plot3d.set_offsets([[], []])
+        plot3d.set_3d_properties([],'z')
+
+        return linePsi,lineTheta,linePhi,plot3d
+
     
-if __name__ == "__main__":
-    #logIMU()
-#    plotIMU()
-    plotIMU3d_2()
+    ani = animation.FuncAnimation(fig, run,imu.getEuler,  blit=True, interval=10,
+        repeat=False, init_func = init)
+    fig.show()
 
 
+
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+
+FLOOR = -10
+CEILING = 10
+
+class AnimatedScatter(object):
+    def __init__(self, imu):
+        self.imu = imu
+        self.angle = 0
+        nmax = 10000
+        self.data = np.zeros((nmax,3))
+
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111,projection = '3d')
+        self.ani = animation.FuncAnimation(self.fig, self.update, interval=100, 
+                                           init_func=self.setup_plot, blit=True)
+
+    def change_angle(self):
+        self.angle = (self.angle + 1)%360
+
+    def setup_plot(self):
+        
+        tempa,(x, y, z),tempb = self.imu.GetRawData()
+        c = ['b', 'r', 'g', 'y', 'm']
+        self.scat = self.ax.scatter([x], [y], [z],c=c, s=200, animated=True)
+
+        self.ax.set_xlim3d(FLOOR, CEILING)
+        self.ax.set_ylim3d(FLOOR, CEILING)
+        self.ax.set_zlim3d(FLOOR, CEILING)
+
+        return self.scat,
+
+    def update_Data(self,i):
+        tempa,(a,b,c),tempb = self.imu.GetRawData()
+        self.data[i,0] = a
+        self.data[i,1] = b
+        self.data[i,2] = c
+
+    def update(self, i):
+        self.update_Data(i)
+        data = self.data
+        # data = np.transpose(data)
+
+        self.scat.set_offsets(data[:,:2])
+        #self.scat.set_3d_properties(data)
+        self.scat.set_3d_properties(data[:,2:],'z')
+
+        # self.change_angle()
+        # self.ax.view_init(30,self.angle)
+        plt.draw()
+        return self.scat,
+
+    def show(self):
+        plt.show()
+
+
+# if __name__ == "__main__":
+#     #logIMU()
+# #    plotIMU()
+#     plotIMU3d_2()
+
+
+if __name__ == '__main__':
+    a = AnimatedScatter()
+    a.show()
