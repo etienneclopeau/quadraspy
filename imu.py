@@ -448,7 +448,7 @@ class AnimatedScatter(object):
     def setup_plot(self):
         
         accX,accy,accz,magX,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
-        x,y,z = ,magX,magy,magz
+        x,y,z = magX,magy,magz
         c = ['b', 'r', 'g', 'y', 'm']
         self.scat = self.ax.scatter([x], [y], [z],c=c, s=200, animated=True)
 
