@@ -178,7 +178,10 @@ class IMU():
 
         
     def getRawData(self):
-        return self.acc,self.mag,self.gyr
+        accX,accy,accz = self.acc[0],self.acc[1],self.acc[2]
+        magX,magy,magz = self.mag[0],self.mag[1],self.mag[2]
+        gyrX,gyry,gyrz = self.gyr[0],self.gyr[1],self.gyr[2]
+        return accX,accy,accz,magX,magy,magz,gyrX,gyry,gyrz
     def getEuler(self):
         quat0=self.quat0
         quat1=-self.quat1
@@ -444,7 +447,8 @@ class AnimatedScatter(object):
 
     def setup_plot(self):
         
-        tempa,(x, y, z),tempb = self.imu.getRawData()
+        accX,accy,accz,magX,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
+        x,y,z = ,magX,magy,magz
         c = ['b', 'r', 'g', 'y', 'm']
         self.scat = self.ax.scatter([x], [y], [z],c=c, s=200, animated=True)
 
@@ -455,10 +459,10 @@ class AnimatedScatter(object):
         return self.scat,
 
     def update_Data(self,i):
-        tempa,(a,b,c),tempb = self.imu.getRawData()
-        self.data[i,0] = a
-        self.data[i,1] = b
-        self.data[i,2] = c
+        accX,accy,accz,magX,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
+        self.data[i,0] = magX
+        self.data[i,1] = magy
+        self.data[i,2] = magz
 
     def update(self, i):
         self.update_Data(i)
