@@ -76,7 +76,8 @@ class IMU():
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
         gyroMeasError = 3.14159265358979 * (10. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
-        gyroMeasDrift = 3.14159265358979 * (0.2 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
+        # gyroMeasDrift = 3.14159265358979 * (0.2 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
+        gyroMeasDrift = 3.14159265358979 * (0.0 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
         beta = sqrt(3.0 / 4.0) * gyroMeasError # compute beta
         zeta = sqrt(3.0 / 4.0) * gyroMeasDrift # compute zeta
 
@@ -446,7 +447,7 @@ class AnimatedScatter(object):
         self.axmag3d = self.fig.add_subplot(122,projection = '3d')
         self.axmag = self.fig.add_subplot(121)
         self.axmag.grid()
-        self.ani = animation.FuncAnimation(self.fig, self.update, interval=100, 
+        self.ani = animation.FuncAnimation(self.fig, self.update, interval=10, 
                                            init_func=self.setup_plot, blit=True)
 
     def change_angle(self):
@@ -457,9 +458,9 @@ class AnimatedScatter(object):
         accX,accy,accz,magx,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
         t0 = time()
         self.scatMag3d = self.axmag3d.scatter([magx], [magy], [magz], s=20)
-        self.linemagx, = self.axmag.plot([t0], [magx],'k-')
-        self.linemagy, = self.axmag.plot([t0], [magy],'k-')
-        self.linemagz, = self.axmag.plot([t0], [magz],'k-')
+        self.linemagx, = self.axmag.plot([0], [magx],'-')
+        self.linemagy, = self.axmag.plot([0], [magy],'-')
+        self.linemagz, = self.axmag.plot([0], [magz],'-')
 
 
 
@@ -470,8 +471,8 @@ class AnimatedScatter(object):
 
         self.axmag.set_ylim(-1,1)
         self.t0 = t0
-        self.tmax = t0+10
-        self.axmag.set_xlim(t0,self.tmax)
+        self.tmax = 10
+        self.axmag.set_xlim(0,10)
 
         return self.scatMag3d,self.linemagx,self.linemagy,self.linemagz
 
@@ -489,6 +490,7 @@ class AnimatedScatter(object):
 
     def update(self, i):
         self.update_Data(i)
+        self.data[i,0]= self.data[i,0]-self.t0
         data = self.data
         # data = np.transpose(data)
 
@@ -502,7 +504,7 @@ class AnimatedScatter(object):
 
         if data[i,0] >= self.tmax:
             self.tmax = self.tmax+10
-            self.axmag.set_xlim(self.t0, self.tmax)
+            self.axmag.set_xlim(0, self.tmax)
             self.axmag.figure.canvas.draw()
 
         # self.change_angle()
