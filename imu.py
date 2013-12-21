@@ -428,19 +428,24 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
-
-FLOOR = -10
-CEILING = 10
+import numpy.ma as ma
+FLOOR = -1
+CEILING = 1
 
 class AnimatedScatter(object):
     def __init__(self, imu):
         self.imu = imu
         self.angle = 0
-        nmax = 10000
-        self.data = np.zeros((nmax,3))
+        nmax = 1000
+        self.data = np.zeros((nmax,4))
+        self.data = ma.masked_array(self.data)
+        self.data[1:,:] = ma.masked
+        self.update_Data(0)
 
         self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(111,projection = '3d')
+        self.axmag3d = self.fig.add_subplot(122,projection = '3d')
+        self.axmag = self.fig.add_subplot(121)
+        self.axmag.grid()
         self.ani = animation.FuncAnimation(self.fig, self.update, interval=100, 
                                            init_func=self.setup_plot, blit=True)
 
@@ -449,36 +454,61 @@ class AnimatedScatter(object):
 
     def setup_plot(self):
         
-        accX,accy,accz,magX,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
-        x,y,z = magX,magy,magz
-        c = ['b', 'r', 'g', 'y', 'm']
-        self.scat = self.ax.scatter([x], [y], [z],c=c, s=200, animated=True)
+        accX,accy,accz,magx,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
+        t0 = time()
+        self.scatMag3d = self.axmag3d.scatter([magx], [magy], [magz], s=20)
+        self.linemagx, = self.axmag.plot([t0], [magx],'k-')
+        self.linemagy, = self.axmag.plot([t0], [magy],'k-')
+        self.linemagz, = self.axmag.plot([t0], [magz],'k-')
 
-        self.ax.set_xlim3d(FLOOR, CEILING)
-        self.ax.set_ylim3d(FLOOR, CEILING)
-        self.ax.set_zlim3d(FLOOR, CEILING)
 
-        return self.scat,
+
+        self.axmag3d.set_xlim3d(FLOOR, CEILING)
+        self.axmag3d.set_ylim3d(FLOOR, CEILING)
+        self.axmag3d.set_zlim3d(FLOOR, CEILING)
+
+
+        self.axmag.set_ylim(-1,1)
+        self.t0 = t0
+        self.tmax = t0+10
+        self.axmag.set_xlim(t0,self.tmax)
+
+        return self.scatMag3d,self.linemagx,self.linemagy,self.linemagz
 
     def update_Data(self,i):
-        accX,accy,accz,magX,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
-        self.data[i,0] = magX
-        self.data[i,1] = magy
-        self.data[i,2] = magz
+        accX,accy,accz,magx,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
+        t=time()
+        print t,magx,magy,magz
+        self.data[i,0] = t
+        self.data[i,1] = magx
+        self.data[i,2] = magy
+        self.data[i,3] = magz
+        # self.data[i,0] = ma.nomask
+        # print 'res'
+
 
     def update(self, i):
         self.update_Data(i)
         data = self.data
         # data = np.transpose(data)
 
-        self.scat.set_offsets(data[:,:2])
-        #self.scat.set_3d_properties(data)
-        self.scat.set_3d_properties(data[:,2:],'z')
+        # self.scatMag3d.set_offsets(data[:,1:3])
+        # self.scatMag3d.set_3d_properties(data[:,3],'z')
+        self.scatMag3d._offsets3d = (data[:,1],data[:,2],data[:,3])
+
+        self.linemagx.set_data(data[:,0],data[:,1])
+        self.linemagy.set_data(data[:,0],data[:,2])
+        self.linemagz.set_data(data[:,0],data[:,3])
+
+        if data[i,0] >= self.tmax:
+            self.tmax = self.tmax+10
+            self.axmag.set_xlim(self.t0, self.tmax)
+            self.axmag.figure.canvas.draw()
 
         # self.change_angle()
         # self.ax.view_init(30,self.angle)
         plt.draw()
-        return self.scat,
+        return self.scatMag3d,self.linemagx,self.linemagy,self.linemagz
 
     def show(self):
         plt.show()
