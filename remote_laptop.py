@@ -9,7 +9,7 @@ import Pyro4.naming, Pyro4.core, sys
 #-- Locate the Name Server
 print 'Searching Name Server...'
 
-ns = Pyro4.locateNS(host = '192.168.1.28', port = 9090)
+ns = Pyro4.locateNS(host = '192.168.1.98', port = 9090)
 print 'Name Server found '
 
 
