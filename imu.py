@@ -8,7 +8,7 @@ import threading
 from time import gmtime, strftime, time, sleep
 from numpy import   array,  sqrt,zeros,cross,arctan,arcsin,radians,degrees,arctan2
 from numpy.linalg import norm as npnorm
-from capteurs import getCapteurs
+
  
 def conj(q):
     return array([q[0],-q[1],-q[2],-q[3]])
@@ -28,22 +28,31 @@ class IMU():
     phi: rotation around x
     """
     
-    def __init__(self, log = True):
+    def __init__(self, log = True, logSleep = 0., simu = False):
         self.tbefore = time()
-        
-        logFileName = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
-        self.logFile = open(logFileName,'w')
-        self.accelerometer, self.magnetometer, self.gyrometer = getCapteurs()
-        self.running = True
 
+        self.log_ = log
+        self.logSleep = logSleep
+        if self.log_ :
+            logFileName = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
+            self.logFile = open(logFileName,'w')
+        
+        self.running = True
 
         self.gyrc = array([0.,0.,0.])
         self.gyr_ba = array([0.,0.,0.])
-        self.tcurrent = 0.
         self.deltat = 0.
-        self.acc = self.accelerometer.getAcc()
-        self.gyr = self.gyrometer.getGyr()
-        self.mag = self.magnetometer.getMag()
+
+        if simu == False:
+            from capteurs import getCapteurs
+            self.getMeasurements = self.getMeasurements_real
+            self.accelerometer, self.magnetometer, self.gyrometer = getCapteurs()
+            self.tcurrent ,self.gyr ,self.acc ,self.mag = self.getMeasurements()
+        else:
+            self.simuFile = open(simu)
+            self.getMeasurements = self.getMeasurements_simu
+            self.tcurrent ,self.gyr ,self.acc ,self.mag = self.getMeasurements()
+
 
         self.quat0 = 1.
         self.quat1 = 0.
@@ -56,23 +65,60 @@ class IMU():
         self.start()
 
     def start(self):
-        self.thread = threading.Thread(target = self.run)
-        self.thread.start()
+        self.threads = list()
+        if self.log_ and self.logSleep > 0:
+            self.threads.append(threading.Thread(target = self.run))
+            self.threads.append(threading.Thread(target = self.runLog))
+        elif self.log_ and self.logSleep == 0:
+            self.threads.append(threading.Thread(target = self.runAndrunLog))
+        else:
+            self.threads.append(threading.Thread(target = self.run))
+        for t in self.threads:
+            t.start()
+    
+
 
     def run(self):
         while self.running:
             self.update()
+    def runLog(self):
+        while self.running:
+            self.log()
+            time.sleep(self.logSleep)
+    def runAndrunLog(self):
+        while self.running:
+            self.update()
+            self.log()
+
 
     def stop(self):
-        self.runnning = False
+        self.running = False
+        # for t in self.threads:
+        #     t.stop()
+
+    def getMeasurements_real(self):
+        
+        return time(), \
+               self.accelerometer.getAcc(), \
+               self.magnetometer.getMag(),  \
+               self.gyrometer.getGyr()
+
+    def getMeasurements_simu(self):
+        try:
+            logValues = self.simuFile.readline().split()
+            res = [float(v) for v in logValues[:10]]
+            # sleep(0.1)
+            print res[0]
+            return res[0],array(res[1:4]),array(res[4:7]),array(res[7:10])
+        except: 
+            print "endOfLog"
+            self.stop()
+            return 0,array([0,0,0]),array([0,0,0]),array([0,0,0])
 
     def update(self):
         """updates the quaternions
         """
-        self.tcurrent = time()
-        self.gyr = self.gyrometer.getGyr()
-        self.acc = self.accelerometer.getAcc()
-        self.mag = self.magnetometer.getMag()
+        self.tcurrent , self.acc , self.mag, self.gyr = self.getMeasurements()
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
         gyroMeasError = 3.14159265358979 * (10. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
@@ -179,12 +225,12 @@ class IMU():
 
         
     def getRawData(self):
-        accX,accy,accz = self.acc[0],self.acc[1],self.acc[2]
-        magX,magy,magz = self.mag[0],self.mag[1],self.mag[2]
-        gyrX,gyry,gyrz = self.gyr[0],self.gyr[1],self.gyr[2]
-        return float(accX),float(accy),float(accz), \
-               float(magX),float(magy),float(magz), \
-               float(gyrX),float(gyry),float(gyrz)
+        accx,accy,accz = self.acc[0],self.acc[1],self.acc[2]
+        magx,magy,magz = self.mag[0],self.mag[1],self.mag[2]
+        gyrx,gyry,gyrz = self.gyr[0],self.gyr[1],self.gyr[2]
+        return float(accx),float(accy),float(accz), \
+               float(magx),float(magy),float(magz), \
+               float(gyrx),float(gyry),float(gyrz)
     def getEuler(self):
         quat0=self.quat0
         quat1=-self.quat1
@@ -214,18 +260,15 @@ class IMU():
         
 
 
-def logIMU(print_ = True, log = False, sleeping = 0.1):
-    imu = IMU(log = log)
+def logIMU(print_ = True, log = False, logSleep = 0.1):
+    imu = IMU(log = log, logSleep = sleeping)
     i=0
     while True:
         i+=1
-        #print i
-        if log:
-            imu.log()
         if print_:
             psi,theta,phi = imu.getEuler()
             print '%10.7f %10.7f %10.7f'%(degrees(psi),degrees(theta),degrees(phi))
-        sleep(sleeping)
+        sleep(logSleep)
 
 def timeIMU(niter = 1000):
     
