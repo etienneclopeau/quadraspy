@@ -104,7 +104,7 @@ class IMU():
         mag/= npnorm(mag)
 
         return time(), \
-               acc, \
+               -acc, \
                mag,  \
                self.gyrometer.getGyr()
 
@@ -130,7 +130,7 @@ class IMU():
         # gyroMeasDrift = 3.14159265358979 * (0.2 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
         gyroMeasDrift = 3.14159265358979 * (1. / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
         beta = sqrt(3.0 / 4.0) * gyroMeasError # compute beta
-        zeta = sqrt(3.0 / 4.0) * gyroMeasDrift # compute zeta
+        zeta = sqrt(3.0 / 4.0) * gyroMeasDrift # compute zet    a
 
 
  
