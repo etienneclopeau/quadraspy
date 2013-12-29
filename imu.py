@@ -98,9 +98,14 @@ class IMU():
 
     def getMeasurements_real(self):
         
+        acc = self.accelerometer.getAcc()
+        acc/= npnorm(acc)
+        mag = self.magnetometer.getMag()
+        mag/= npnorm(mag)
+
         return time(), \
-               self.accelerometer.getAcc(), \
-               self.magnetometer.getMag(),  \
+               acc, \
+               mag,  \
                self.gyrometer.getGyr()
 
     def getMeasurements_simu(self):
@@ -144,10 +149,10 @@ class IMU():
 
 
        # normalise the accelerometer measurement
-        self.acc /= npnorm(self.acc)
+        # self.acc /= npnorm(self.acc)
     
         # normalise the magnetometer measurement
-        self.mag /= npnorm(self.mag)
+        # self.mag /= npnorm(self.mag)
     
         # compute the objective function and Jacobian
         f_1 = twoquat[1] * self.quat3 - twoquat[0] * self.quat2 - self.acc[0]
@@ -228,10 +233,6 @@ class IMU():
         accx,accy,accz = self.acc[0],self.acc[1],self.acc[2]
         magx,magy,magz = self.mag[0],self.mag[1],self.mag[2]
         gyrx,gyry,gyrz = self.gyr[0],self.gyr[1],self.gyr[2]
-        print accx,accy,accz
-        if self.acc[0] > 50 : raise
-        if self.acc[1] > 50 : raise
-        if self.acc[2] > 50 : raise
         return float(accx),float(accy),float(accz), \
                float(magx),float(magy),float(magz), \
                float(gyrx),float(gyry),float(gyrz)
