@@ -144,15 +144,7 @@ class IMU():
 
 
        # normalise the accelerometer measurement
-        print '---'
-        print self.acc
-        print npnorm(self.acc)
         self.acc /= npnorm(self.acc)
-        print self.acc
-        if self.acc[0] > 50 : raise
-        if self.acc[1] > 50 : raise
-        if self.acc[2] > 50 : raise
-
     
         # normalise the magnetometer measurement
         self.mag /= npnorm(self.mag)
@@ -236,6 +228,10 @@ class IMU():
         accx,accy,accz = self.acc[0],self.acc[1],self.acc[2]
         magx,magy,magz = self.mag[0],self.mag[1],self.mag[2]
         gyrx,gyry,gyrz = self.gyr[0],self.gyr[1],self.gyr[2]
+        print accx,accy,accz
+        if self.acc[0] > 50 : raise
+        if self.acc[1] > 50 : raise
+        if self.acc[2] > 50 : raise
         return float(accx),float(accy),float(accz), \
                float(magx),float(magy),float(magz), \
                float(gyrx),float(gyry),float(gyrz)
