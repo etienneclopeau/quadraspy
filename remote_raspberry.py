@@ -7,7 +7,7 @@ from imu import IMU
 imu=IMU()
 
 #Pyro4.naming.startNS(host=None, port=None, enableBroadcast=True, bchost=None, bcport=None, unixsocket=None, nathost=None, natport=None)
-
+Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
 daemon=Pyro4.Daemon(host="192.168.1.98")                 # make a Pyro daemon
 # daemon=Pyro4.Daemon(host="192.168.1.28")                 # make a Pyro daemon
 ns=Pyro4.locateNS()                   # find the name server
