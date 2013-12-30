@@ -12,7 +12,7 @@ print 'Searching Name Server...'
 ns = Pyro4.locateNS(host = '192.168.1.98', port = 9090)
 print 'Name Server found '
 
-
+Pyro4.config.SERIALIZER = 'pickle'
 imu=Pyro4.Proxy(ns.lookup("r_IMU"))          # get a Pyro proxy to the greeting object
 
 # while True:
