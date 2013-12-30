@@ -98,14 +98,10 @@ class IMU():
 
     def getMeasurements_real(self):
         
-        acc = self.accelerometer.getAcc()
-        # acc/= npnorm(acc)
-        mag = self.magnetometer.getMag()
-        # mag/= npnorm(mag)
 
         return time(), \
-               acc, \
-               mag,  \
+               self.accelerometer.getAcc(), \
+               self.magnetometer.getMag(),  \
                self.gyrometer.getGyr()
 
     def getMeasurements_simu(self):
@@ -124,6 +120,11 @@ class IMU():
         """updates the quaternions
         """
         self.tcurrent , acc , mag, self.gyr = self.getMeasurements()
+       # normalise the accelerometer measurement
+        self.acc /= npnorm(acc)
+    
+        # normalise the magnetometer measurement
+        self.mag /= npnorm(mag)
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
         gyroMeasError = 3.14159265358979 * (10. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
@@ -148,11 +149,6 @@ class IMU():
 
 
 
-       # normalise the accelerometer measurement
-        self.acc /= npnorm(acc)
-    
-        # normalise the magnetometer measurement
-        self.mag /= npnorm(mag)
     
         # compute the objective function and Jacobian
         f_1 = twoquat[1] * self.quat3 - twoquat[0] * self.quat2 - self.acc[0]

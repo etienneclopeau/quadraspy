@@ -290,7 +290,7 @@ def ellipsoidFit_DistanceEllipsoide(Th):
             costs.append(distanceToEllipsoid(a,b,c,point[0],point[1],point[2]))
             #if costs[-1]>1000: raise
             cost += costs[-1]
-        print cost
+        print cost,theta,psi,phi,a,b,c,cx,cy,cz
 
         # fig2 = plt.figure()
         # ax = fig2.add_subplot(111)
@@ -347,28 +347,28 @@ def getCalData(fileName):
 
 if __name__ == "__main__":        
     #logHvalues('maglog.dat',runningtime = 30)    
-    Th = getData('_logMag.dat')
+    Th = getData('log/logMagForCalib.dat')
     #plot(Th)
 #    ellipsoidFit_DistanceSphere(Th)
-    #ellipsoidFit_DistanceEllipsoide(Th)
+    ellipsoidFit_DistanceEllipsoide(Th)
     
-    theta,psi,phi,a,b,c,cx,cy,cz = [1.16461960e-01 , -1.22692113e-01 ,  5.51200083e-01 ,  5.52765112e+02,
-   5.21074288e+02 ,  4.48637709e+02 ,  1.45520786e+02 , -5.25322073e+01,
-  -1.40086242e+01]
+  #   theta,psi,phi,a,b,c,cx,cy,cz = [1.16461960e-01 , -1.22692113e-01 ,  5.51200083e-01 ,  5.52765112e+02,
+  #  5.21074288e+02 ,  4.48637709e+02 ,  1.45520786e+02 , -5.25322073e+01,
+  # -1.40086242e+01]
 
-    theta,psi,phi,a,b,c,cx,cy,cz = [-1.16681928e-01 ,  1.22478698e-01 , -2.59043829e+00 ,  5.52752085e+02,
-   5.21075812e+02 ,  4.48639923e+02 ,  1.45509558e+02 , -5.25339048e+01,
-  -1.40101198e+01]
-    theta,psi,phi,a,b,c,cx,cy,cz = [ 0.0162383499677, -0.11500901018, 3.28073261891 ,487.423874818, 442.976679127 ,414.588916629, 132.442428135 ,-96.8858269441, -24.5031275703 ]
+  #   theta,psi,phi,a,b,c,cx,cy,cz = [-1.16681928e-01 ,  1.22478698e-01 , -2.59043829e+00 ,  5.52752085e+02,
+  #  5.21075812e+02 ,  4.48639923e+02 ,  1.45509558e+02 , -5.25339048e+01,
+  # -1.40101198e+01]
+  #   theta,psi,phi,a,b,c,cx,cy,cz = [ 0.0162383499677, -0.11500901018, 3.28073261891 ,487.423874818, 442.976679127 ,414.588916629, 132.442428135 ,-96.8858269441, -24.5031275703 ]
 
-    Mat = array(  \
-      [[cos(theta)*cos(phi) , sin(psi)*sin(theta)*cos(phi) - cos(psi)*sin(phi) , cos(psi)*sin(theta)*cos(phi) + sin(psi)*sin(phi)],  \
-       [cos(theta)*sin(phi) , sin(psi)*sin(theta)*sin(phi) + cos(psi)*cos(phi) , cos(psi)*sin(theta)*sin(phi) - sin(psi)*cos(phi)],  \
-       [   -sin(theta)      ,               sin(psi)*cos(theta)                , cos(psi)*cos(theta)] ] )
-    center = array([cx,cy,cz])
-    r = array([a,b,c])
-    Thcal = array([Mat.transpose().dot(v-center) for v in Th])
-    plot(Th,Thcal)
+  #   Mat = array(  \
+  #     [[cos(theta)*cos(phi) , sin(psi)*sin(theta)*cos(phi) - cos(psi)*sin(phi) , cos(psi)*sin(theta)*cos(phi) + sin(psi)*sin(phi)],  \
+  #      [cos(theta)*sin(phi) , sin(psi)*sin(theta)*sin(phi) + cos(psi)*cos(phi) , cos(psi)*sin(theta)*sin(phi) - sin(psi)*cos(phi)],  \
+  #      [   -sin(theta)      ,               sin(psi)*cos(theta)                , cos(psi)*cos(theta)] ] )
+  #   center = array([cx,cy,cz])
+  #   r = array([a,b,c])
+  #   Thcal = array([Mat.transpose().dot(v-center) for v in Th])
+  #   plot(Th,Thcal)
 
     
 
