@@ -28,7 +28,7 @@ class IMU():
     phi: rotation around x
     """
     
-    def __init__(self, log = True, logSleep = 0., simu = False):
+    def __init__(self, log = True, logSleep = 0., simu = False, start = True):
         self.tbefore = time()
 
         self.log_ = log
@@ -61,8 +61,8 @@ class IMU():
         self.earth_magnetic_field_x = 1. # orientation of earth magnetic field in ground coordinates
         self.earth_magnetic_field_z = 0. 
 
-
-        self.start()
+        if start:
+            self.start()
 
     def start(self):
         self.threads = list()
@@ -104,7 +104,7 @@ class IMU():
         mag/= npnorm(mag)
 
         return time(), \
-               -acc, \
+               acc, \
                mag,  \
                self.gyrometer.getGyr()
 
