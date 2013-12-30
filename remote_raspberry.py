@@ -1,6 +1,7 @@
 
 #lancer: 
- # set PYRO_SERIALIZER=pickle
+ # export PYRO_SERIALIZER=pickle
+ # export PYRO_SERIALIZERS_ACCEPTED=pickle
  # python -m Pyro4.naming -n 192.168.1.98
 
 import Pyro4
