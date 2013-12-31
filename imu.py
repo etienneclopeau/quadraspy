@@ -121,10 +121,10 @@ class IMU():
         """
         self.tcurrent , acc , mag, self.gyr = self.getMeasurements()
        # normalise the accelerometer measurement
-        print self.acc
         self.acc /= npnorm(acc)
     
         # normalise the magnetometer measurement
+        print self.mag
         self.mag /= npnorm(mag)
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
