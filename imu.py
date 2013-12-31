@@ -121,7 +121,7 @@ class IMU():
         """
         self.tcurrent , acc , mag, self.gyr = self.getMeasurements()
        # normalise the accelerometer measurement
-        self.acc = -acc / npnorm(acc)
+        self.acc = acc / npnorm(acc)
 
         # normalise the magnetometer measurement
         self.mag = mag / npnorm(mag)
