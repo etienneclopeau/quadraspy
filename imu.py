@@ -127,9 +127,9 @@ class IMU():
         self.mag = mag / npnorm(mag)
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
-        gyroMeasError = 3.14159265358979 * (10. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
+        gyroMeasError = 3.14159265358979 * (5. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
         # gyroMeasDrift = 3.14159265358979 * (0.2 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
-        gyroMeasDrift = 3.14159265358979 * (1. / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
+        gyroMeasDrift = 3.14159265358979 * (0.2 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
         beta = sqrt(3.0 / 4.0) * gyroMeasError # compute beta
         zeta = sqrt(3.0 / 4.0) * gyroMeasDrift # compute zet    a
 
@@ -234,7 +234,7 @@ class IMU():
                float(gyrx),float(gyry),float(gyrz)
     def getGyr_ba(self):
         return self.gyr_ba
-        
+
     def getEuler(self):
         quat0=self.quat0
         quat1=-self.quat1
