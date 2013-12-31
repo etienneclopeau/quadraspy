@@ -119,13 +119,13 @@ class IMU():
     def update(self):
         """updates the quaternions
         """
-        self.tcurrent , self.acc , self.mag, self.gyr = self.getMeasurements()
+        self.tcurrent , acc , mag, self.gyr = self.getMeasurements()
        # normalise the accelerometer measurement
-        self.acc /= npnorm(self.acc)
+        self.acc = acc / npnorm(self.acc)
 
         # normalise the magnetometer measurement
         print self.mag
-        self.mag /= npnorm(self.mag)
+        self.mag = mag / npnorm(self.mag)
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
         gyroMeasError = 3.14159265358979 * (10. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
