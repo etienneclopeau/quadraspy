@@ -121,11 +121,10 @@ class IMU():
         """
         self.tcurrent , acc , mag, self.gyr = self.getMeasurements()
        # normalise the accelerometer measurement
-        self.acc = acc / npnorm(self.acc)
+        self.acc = acc / npnorm(acc)
 
         # normalise the magnetometer measurement
-        print self.mag
-        self.mag = mag / npnorm(self.mag)
+        self.mag = mag / npnorm(mag)
 
         self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
         gyroMeasError = 3.14159265358979 * (10. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
