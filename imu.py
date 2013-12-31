@@ -232,6 +232,9 @@ class IMU():
         return float(accx),float(accy),float(accz), \
                float(magx),float(magy),float(magz), \
                float(gyrx),float(gyry),float(gyrz)
+    def getGyr_ba(self):
+        return self.gyr_ba
+        
     def getEuler(self):
         quat0=self.quat0
         quat1=-self.quat1
