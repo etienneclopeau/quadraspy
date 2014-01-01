@@ -275,9 +275,9 @@ class IMU():
         # phi = arctan2(2.*(quat2*quat3-quat0*quat1) , 2.*(quat0**2+quat3**2)-1.)
 
         # Compute the Euler angles from the quaternion.
-        phi = atan2(2 * ASq_3 * ASq_4 - 2 * ASq_1 * ASq_2, 2 * ASq_1 * ASq_1 + 2 * ASq_4 * ASq_4 - 1);
-        theta = asin(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_3);
-        psi = atan2(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_4, 2 * ASq_1 * ASq_1 + 2 * ASq_2 * ASq_2 - 1);
+        phi = arctan2(2 * ASq_3 * ASq_4 - 2 * ASq_1 * ASq_2, 2 * ASq_1 * ASq_1 + 2 * ASq_4 * ASq_4 - 1);
+        theta = arcsin(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_3);
+        psi = arctan2(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_4, 2 * ASq_1 * ASq_1 + 2 * ASq_2 * ASq_2 - 1);
      
 
         #print phi,theta,psi
