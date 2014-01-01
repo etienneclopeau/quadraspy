@@ -235,6 +235,9 @@ class IMU():
     def getGyr_ba(self):
         return self.gyr_ba
 
+    def getEarth_mag(self):
+        return self.earth_magnetic_field_x,self.earth_magnetic_field_z
+
     def getEuler(self):
         quat0=self.quat0
         quat1=-self.quat1
