@@ -65,6 +65,7 @@ class IMU():
         self.earth_magnetic_field_x = 1. # orientation of earth magnetic field in ground coordinates
         self.earth_magnetic_field_z = 0. 
 
+        self.it = 0
         if start:
             self.start()
 
