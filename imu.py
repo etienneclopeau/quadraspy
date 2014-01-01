@@ -58,6 +58,10 @@ class IMU():
         self.quat1 = 0.
         self.quat2 = 0.
         self.quat3 = 0.
+        self.iniquat0 = 1.
+        self.iniquat1 = 0.
+        self.iniquat2 = 0.
+        self.iniquat3 = 0.
         self.earth_magnetic_field_x = 1. # orientation of earth magnetic field in ground coordinates
         self.earth_magnetic_field_z = 0. 
 
@@ -222,7 +226,14 @@ class IMU():
         self.earth_magnetic_field_x = sqrt((h_x * h_x) + (h_y * h_y))
         self.earth_magnetic_field_z = h_z
         
+        if it == 0:
+            self.iniquat0 = self.quat0
+            self.iniquat1 = self.quat1
+            self.iniquat2 = self.quat2
+            self.iniquat3 = self.quat3
+
         self.tbefore = self.tcurrent
+        it+=1
 
         
     def getRawData(self):
@@ -239,16 +250,35 @@ class IMU():
         return self.earth_magnetic_field_x,self.earth_magnetic_field_z
 
     def getEuler(self):
-        quat0=self.quat0
-        quat1=-self.quat1
-        quat2=-self.quat2
-        quat3=-self.quat3
+        ESq_1 =  self.quat0
+        ESq_2 = -self.quat1
+        ESq_3 = -self.quat2
+        ESq_4 = -self.quat3
+
+        AEq_1 = self.iniquat0
+        AEq_2 = self.iniquat1
+        AEq_3 = self.iniquat2
+        AEq_4 = self.iniquat3
+        # Compute the quaternion product.
+        ASq_1 = ESq_1 * AEq_1 - ESq_2 * AEq_2 - ESq_3 * AEq_3 - ESq_4 * AEq_4;
+        ASq_2 = ESq_1 * AEq_2 + ESq_2 * AEq_1 + ESq_3 * AEq_4 - ESq_4 * AEq_3;
+        ASq_3 = ESq_1 * AEq_3 - ESq_2 * AEq_4 + ESq_3 * AEq_1 + ESq_4 * AEq_2;
+        ASq_4 = ESq_1 * AEq_4 + ESq_2 * AEq_3 - ESq_3 * AEq_2 + ESq_4 * AEq_1;
+
+
 #        phi = arctan(2.*(self.quat0*self.quat1+self.quat2*self.quat3)/(1-2*(self.quat1**2+self.quat2**2)))
 #        theta = arcsin(2*(self.quat0*self.quat2-self.quat3*self.quat1))
 #        psi = arctan(2.*(self.quat0*self.quat3+self.quat1*self.quat2)/(1-2*(self.quat2**2+self.quat3**2)))
-        psi = arctan2(2.*(quat1*quat2-quat0*quat3), 2.*(quat0**2+quat1**2)-1.)
-        theta = -arcsin(2.*(quat1*quat3+quat0*quat2))
-        phi = arctan2(2.*(quat2*quat3-quat0*quat1) , 2.*(quat0**2+quat3**2)-1.)
+        # psi = arctan2(2.*(quat1*quat2-quat0*quat3), 2.*(quat0**2+quat1**2)-1.)
+        # theta = -arcsin(2.*(quat1*quat3+quat0*quat2))
+        # phi = arctan2(2.*(quat2*quat3-quat0*quat1) , 2.*(quat0**2+quat3**2)-1.)
+
+        # Compute the Euler angles from the quaternion.
+        phi = atan2(2 * ASq_3 * ASq_4 - 2 * ASq_1 * ASq_2, 2 * ASq_1 * ASq_1 + 2 * ASq_4 * ASq_4 - 1);
+        theta = asin(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_3);
+        psi = atan2(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_4, 2 * ASq_1 * ASq_1 + 2 * ASq_2 * ASq_2 - 1);
+     
+
         #print phi,theta,psi
         return float(psi),float(theta),float(phi)
     
