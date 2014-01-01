@@ -227,7 +227,7 @@ class IMU():
         self.earth_magnetic_field_x = sqrt((h_x * h_x) + (h_y * h_y))
         self.earth_magnetic_field_z = h_z
         
-        if it == 0:
+        if self.it == 0:
             self.iniquat0 = self.quat0
             self.iniquat1 = self.quat1
             self.iniquat2 = self.quat2
