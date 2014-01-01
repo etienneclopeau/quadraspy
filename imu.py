@@ -234,7 +234,7 @@ class IMU():
             self.iniquat3 = self.quat3
 
         self.tbefore = self.tcurrent
-        it+=1
+        self.it+=1
 
         
     def getRawData(self):
