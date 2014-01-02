@@ -28,7 +28,7 @@ class IMU():
     phi: rotation around x
     """
     
-    def __init__(self, log = True, logSleep = 0., simu = False, start = True):
+    def __init__(self, log = True, logSleep = 0., simu = False, start = True, algo = 3):
         self.tbefore = time()
 
         self.log_ = log
@@ -37,35 +37,41 @@ class IMU():
             logFileName = strftime("log/_imuLog_%Y%b%d_%Hh%Mm%Ss", gmtime())
             self.logFile = open(logFileName,'w')
         
-        self.running = True
-
-        self.gyrc = array([0.,0.,0.])
-        self.gyr_ba = array([0.,0.,0.])
-        self.deltat = 0.
 
         if simu == False:
             from capteurs import getCapteurs
             self.getMeasurements = self.getMeasurements_real
             self.accelerometer, self.magnetometer, self.gyrometer = getCapteurs()
-            self.tcurrent ,self.gyr ,self.acc ,self.mag = self.getMeasurements()
         else:
             self.simuFile = open(simu)
             self.getMeasurements = self.getMeasurements_simu
-            self.tcurrent ,self.gyr ,self.acc ,self.mag = self.getMeasurements()
+        
+        self.getMeasurements()
 
 
-        self.quat0 = 1.
-        self.quat1 = 0.
-        self.quat2 = 0.
-        self.quat3 = 0.
-        self.iniquat0 = 1.
-        self.iniquat1 = 0.
-        self.iniquat2 = 0.
-        self.iniquat3 = 0.
+
+        self.kp = 2
+        self.ki = 0.005
+        self.beta = 0.1
+
+        if algo == 0 :
+            self.update = UpdateMadgwickAHRS
+        elif algo == 1 :
+            self.update = UpdateMadgwickIMU
+        elif algo == 3 :
+            self.update = UpdateMahonyAHRS
+        elif algo == 4 :
+            self.update = UpdateMahonyIMU
+
+
+        self.quat = [1.,0.,0.,0.]
         self.earth_magnetic_field_x = 1. # orientation of earth magnetic field in ground coordinates
         self.earth_magnetic_field_z = 0. 
+        self.eInt = [0.,0.,0.]
+        self.deltat = 0.
+        self.running = True
 
-        self.it = 0
+
         if start:
             self.start()
 
@@ -85,6 +91,7 @@ class IMU():
 
     def run(self):
         while self.running:
+            self.getMeasurements()
             self.update()
     def runLog(self):
         while self.running:
@@ -92,517 +99,512 @@ class IMU():
             time.sleep(self.logSleep)
     def runAndrunLog(self):
         while self.running:
+            self.getMeasurements()
             self.update()
             self.log()
 
 
     def stop(self):
         self.running = False
-        # for t in self.threads:
-        #     t.stop()
 
     def getMeasurements_real(self):
-        
-
-        return time(), \
-               self.accelerometer.getAcc(), \
-               self.magnetometer.getMag(),  \
-               self.gyrometer.getGyr()
+        """
+        update the measurement data and time data from sensors
+        """
+        self.tbefore = self.tcurrent
+        self.tcurrent = time()
+        self.deltat = self.tcurrent - self.tbefore
+        self.acc = self.accelerometer.getAcc()
+        self.gyr = self.gyrometer.getGyr()
+        self.mag = self.magnetometer.getMag()
 
     def getMeasurements_simu(self):
+        """
+        update the measurement data and time data from a logFile
+        this is used for simulations
+        """
         try:
+            self.tbefore = self.tcurrent
             logValues = self.simuFile.readline().split()
             res = [float(v) for v in logValues[:10]]
             # sleep(0.1)
             print res[0]
-            return res[0],array(res[1:4]),array(res[4:7]),array(res[7:10])
+            self.tcurrent = res[0]
+            self.acc = array(res[1:4])
+            self.mag = array(res[4:7])
+            self.gyr = array(res[7:10])
+            self.deltat = self.tcurrent - self.tbefore
         except: 
             print "endOfLog"
             self.stop()
-            return 0,array([0,0,0]),array([0,0,0]),array([0,0,0])
-
-    def update(self):
-        """updates the quaternions
-        """
-        self.tcurrent , acc , mag, self.gyr = self.getMeasurements()
-       # normalise the accelerometer measurement
-        self.acc = acc / npnorm(acc)
-
-        # normalise the magnetometer measurement
-        self.mag = mag / npnorm(mag)
-
-        self.deltat = self.tcurrent - self.tbefore   # sampling period in seconds (shown as 1 ms)
-        gyroMeasError = 3.14159265358979 * (5. / 180.0) # gyroscope measurement error in rad/s (shown as 5 deg/s)
-        # gyroMeasDrift = 3.14159265358979 * (0.2 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
-        gyroMeasDrift = 3.14159265358979 * (0.0 / 180.0) # gyroscope measurement error in rad/s/s (shown as 0.2f deg/s/s)
-        beta = sqrt(3.0 / 4.0) * gyroMeasError # compute beta
-        zeta = sqrt(3.0 / 4.0) * gyroMeasDrift # compute zet    a
-
-
- 
-        # axulirary variables to avoid reapeated calcualtions
-        quata = array([self.quat0,self.quat1,self.quat2,self.quat3])
-        halfquat = 0.5 * quata
-        twoquat = 2.0 * quata
-        twoearth_magnetic_field_x = 2.0 * self.earth_magnetic_field_x
-        twoearth_magnetic_field_z = 2.0 * self.earth_magnetic_field_z
-        twoearth_magnetic_field_xquat = 2.0 * self.earth_magnetic_field_x * quata
-        twoearth_magnetic_field_zquat = 2.0 * self.earth_magnetic_field_z * quata
-        twomag_x = 2.0 * self.mag[0]
-        twomag_y = 2.0 * self.mag[1]
-        twomag_z = 2.0 * self.mag[2]
-
-
-
-    
-        # compute the objective function and Jacobian
-        f_1 = twoquat[1] * self.quat3 - twoquat[0] * self.quat2 - self.acc[0]
-        f_2 = twoquat[0] * self.quat1 + twoquat[2] * self.quat3 - self.acc[1]
-        f_3 = 1.0 - twoquat[1] * self.quat1 - twoquat[2] * self.quat2 - self.acc[2]
-        f_4 = twoearth_magnetic_field_x * (0.5 - self.quat2 * self.quat2 - self.quat3 * self.quat3) + twoearth_magnetic_field_z * (self.quat1*self.quat3 - self.quat0*self.quat2) - self.mag[0]
-        f_5 = twoearth_magnetic_field_x * (self.quat1 * self.quat2 - self.quat0 * self.quat3) + twoearth_magnetic_field_z * (self.quat0 * self.quat1 + self.quat2 * self.quat3) - self.mag[1]
-        f_6 = twoearth_magnetic_field_x * (self.quat0*self.quat2 + self.quat1*self.quat3) + twoearth_magnetic_field_z * (0.5 - self.quat1 * self.quat1 - self.quat2 * self.quat2) - self.mag[2]
-        J_11or24 = twoquat[2] # J_11 negated in matrix multiplication
-        J_12or23 = 2.0 * self.quat3
-        J_13or22 = twoquat[0] # J_12 negated in matrix multiplication
-        J_14or21 = twoquat[1]
-        J_32 = 2.0 * J_14or21 # negated in matrix multiplication
-        J_33 = 2.0 * J_11or24 # negated in matrix multiplication
-        J_41 = twoearth_magnetic_field_zquat[2] # negated in matrix multiplication
-        J_42 = twoearth_magnetic_field_zquat[3]
-        J_43 = 2.0 * twoearth_magnetic_field_xquat[2] + twoearth_magnetic_field_zquat[0] # negated in matrix multiplication
-        J_44 = 2.0 * twoearth_magnetic_field_xquat[3] - twoearth_magnetic_field_zquat[1] # negated in matrix multiplication
-        J_51 = twoearth_magnetic_field_xquat[3] - twoearth_magnetic_field_zquat[1] # negated in matrix multiplication
-        J_52 = twoearth_magnetic_field_xquat[2] + twoearth_magnetic_field_zquat[0]
-        J_53 = twoearth_magnetic_field_xquat[1] + twoearth_magnetic_field_zquat[3]
-        J_54 = twoearth_magnetic_field_xquat[0] - twoearth_magnetic_field_zquat[2] # negated in matrix multiplication
-        J_61 = twoearth_magnetic_field_xquat[2]
-        J_62 = twoearth_magnetic_field_xquat[3] - 2.0 * twoearth_magnetic_field_zquat[1]
-        J_63 = twoearth_magnetic_field_xquat[0] - 2.0 * twoearth_magnetic_field_zquat[2]
-        J_64 = twoearth_magnetic_field_xquat[1]
-    
-        # compute the gradient (matrix multiplication)
-        quatHatDot_1 = J_14or21 * f_2 - J_11or24 * f_1 - J_41 * f_4 - J_51 * f_5 + J_61 * f_6
-        quatHatDot_2 = J_12or23 * f_1 + J_13or22 * f_2 - J_32 * f_3 + J_42 * f_4 + J_52 * f_5 + J_62 * f_6
-        quatHatDot_3 = J_12or23 * f_2 - J_33 * f_3 - J_13or22 * f_1 - J_43 * f_4 + J_53 * f_5 + J_63 * f_6
-        quatHatDot_4 = J_14or21 * f_1 + J_11or24 * f_2 - J_44 * f_4 - J_54 * f_5 + J_64 * f_6
-        # normalise the gradient to estimate direction of the gyroscope error
-        norm = sqrt(quatHatDot_1 * quatHatDot_1 + quatHatDot_2 * quatHatDot_2 + quatHatDot_3 * quatHatDot_3 + quatHatDot_4 * quatHatDot_4)
-        quatHatDot_1 = quatHatDot_1 / norm
-        quatHatDot_2 = quatHatDot_2 / norm
-        quatHatDot_3 = quatHatDot_3 / norm
-        quatHatDot_4 = quatHatDot_4 / norm
-        # compute angular estimated direction of the gyroscope error
-        gyr_err = array([twoquat[0] * quatHatDot_2 - twoquat[1] * quatHatDot_1 - twoquat[2] * quatHatDot_4 + twoquat[3] * quatHatDot_3,
-                         twoquat[0] * quatHatDot_3 + twoquat[1] * quatHatDot_4 - twoquat[2] * quatHatDot_1 - twoquat[3] * quatHatDot_2,
-                         twoquat[0] * quatHatDot_4 - twoquat[1] * quatHatDot_3 + twoquat[2] * quatHatDot_2 - twoquat[3] * quatHatDot_1])
-        # compute and remove the gyroscope baises
-        
-        self.gyr_ba += gyr_err * self.deltat * zeta
-        # print self.gyr_ba, gyr_err, self.deltat, zeta
-        # print  gyr_err* self.deltat* zeta
-        self.gyrc = self.gyr-self.gyr_ba
-        # compute the quaternion rate measured by gyroscopes
-        quatDot_omega_1 = -halfquat[1] * self.gyrc[0] - halfquat[2] * self.gyrc[1] - halfquat[3] * self.gyrc[2]
-        quatDot_omega_2 = halfquat[0] * self.gyrc[0] + halfquat[2] * self.gyrc[2] - halfquat[3] * self.gyrc[1]
-        quatDot_omega_3 = halfquat[0] * self.gyrc[1] - halfquat[1] * self.gyrc[2] + halfquat[3] * self.gyrc[0]
-        quatDot_omega_4 = halfquat[0] * self.gyrc[2] + halfquat[1] * self.gyrc[1] - halfquat[2] * self.gyrc[0]
-        # compute then integrate the estimated quaternion rate
-        self.quat0 += (quatDot_omega_1 - (beta * quatHatDot_1)) * self.deltat
-        self.quat1 += (quatDot_omega_2 - (beta * quatHatDot_2)) * self.deltat
-        self.quat2 += (quatDot_omega_3 - (beta * quatHatDot_3)) * self.deltat
-        self.quat3 += (quatDot_omega_4 - (beta * quatHatDot_4)) * self.deltat
-        # normalise quaternion 
-        norm = sqrt(self.quat0*self.quat0+self.quat1*self.quat1+self.quat2*self.quat2+self.quat3*self.quat3)
-        self.quat0 = self.quat0/norm 
-        self.quat1 = self.quat1/norm 
-        self.quat2 = self.quat2/norm 
-        self.quat3 = self.quat3/norm 
-	
-        # compute flux in the earth frame
-        h_x = twomag_x * (0.5 - self.quat2 * self.quat2 - self.quat3 * self.quat3) + twomag_y * (self.quat1*self.quat2 - self.quat0*self.quat3) + twomag_z * (self.quat1*self.quat3 + self.quat0*self.quat2)
-        h_y = twomag_x * (self.quat1*self.quat2 + self.quat0*self.quat3) + twomag_y * (0.5 - self.quat1 * self.quat1 - self.quat3 * self.quat3) + twomag_z * (self.quat2*self.quat3 - self.quat0*self.quat1)
-        h_z = twomag_x * (self.quat1*self.quat3 - self.quat0*self.quat2) + twomag_y * (self.quat2*self.quat3 + self.quat0*self.quat1) + twomag_z * (0.5 - self.quat1 * self.quat1 - self.quat2 * self.quat2)
-        # normalise the flux vector to have only components in the x and z
-        self.earth_magnetic_field_x = sqrt((h_x * h_x) + (h_y * h_y))
-        self.earth_magnetic_field_z = h_z
-        
-        if self.it == 0:
-            self.iniquat0 = self.quat0
-            self.iniquat1 = self.quat1
-            self.iniquat2 = self.quat2
-            self.iniquat3 = self.quat3
-
-        self.tbefore = self.tcurrent
-        self.it+=1
-
         
     def getRawData(self):
+        """
+        return the actuel measured data
+        this is used for remote plotting
+        """
         accx,accy,accz = self.acc[0],self.acc[1],self.acc[2]
         magx,magy,magz = self.mag[0],self.mag[1],self.mag[2]
         gyrx,gyry,gyrz = self.gyr[0],self.gyr[1],self.gyr[2]
-        return float(accx),float(accy),float(accz), \
-               float(magx),float(magy),float(magz), \
-               float(gyrx),float(gyry),float(gyrz)
-    def getGyr_ba(self):
-        return self.gyr_ba
+        return accx,accy,accz, \
+               magx,magy,magz, \
+               gyrx,gyry,gyrz
+    def get_eInt(self):
+        """
+        return the actuel gyro biais
+        this is used for remote plotting
+        """
+        return self.eInt
 
     def getEarth_mag(self):
-        return self.earth_magnetic_field_x,self.earth_magnetic_field_z
+         """
+        return the actuel estimated earth magnetic field
+        this is used for remote plotting
+        """
+       return self.earth_magnetic_field_x,self.earth_magnetic_field_z
 
     def getEuler(self):
-        ESq_1 =  self.quat0
-        ESq_2 = -self.quat1
-        ESq_3 = -self.quat2
-        ESq_4 = -self.quat3
-
-        AEq_1 = self.iniquat0
-        AEq_2 = self.iniquat1
-        AEq_3 = self.iniquat2
-        AEq_4 = self.iniquat3
-        # Compute the quaternion product.
-        ASq_1 = ESq_1 * AEq_1 - ESq_2 * AEq_2 - ESq_3 * AEq_3 - ESq_4 * AEq_4;
-        ASq_2 = ESq_1 * AEq_2 + ESq_2 * AEq_1 + ESq_3 * AEq_4 - ESq_4 * AEq_3;
-        ASq_3 = ESq_1 * AEq_3 - ESq_2 * AEq_4 + ESq_3 * AEq_1 + ESq_4 * AEq_2;
-        ASq_4 = ESq_1 * AEq_4 + ESq_2 * AEq_3 - ESq_3 * AEq_2 + ESq_4 * AEq_1;
-
+        quat0 =  self.quat[0]
+        quat1 = -self.quat[1]
+        quat2 = -self.quat[2]
+        quat3 = -self.quat[3]
 
 #        phi = arctan(2.*(self.quat0*self.quat1+self.quat2*self.quat3)/(1-2*(self.quat1**2+self.quat2**2)))
 #        theta = arcsin(2*(self.quat0*self.quat2-self.quat3*self.quat1))
 #        psi = arctan(2.*(self.quat0*self.quat3+self.quat1*self.quat2)/(1-2*(self.quat2**2+self.quat3**2)))
-        # psi = arctan2(2.*(quat1*quat2-quat0*quat3), 2.*(quat0**2+quat1**2)-1.)
-        # theta = -arcsin(2.*(quat1*quat3+quat0*quat2))
-        # phi = arctan2(2.*(quat2*quat3-quat0*quat1) , 2.*(quat0**2+quat3**2)-1.)
+
+        psi = arctan2(2.*(quat1*quat2-quat0*quat3), 2.*(quat0**2+quat1**2)-1.)
+        theta = -arcsin(2.*(quat1*quat3+quat0*quat2))
+        phi = arctan2(2.*(quat2*quat3-quat0*quat1) , 2.*(quat0**2+quat3**2)-1.)
 
         # Compute the Euler angles from the quaternion.
-        phi = arctan2(2 * ASq_3 * ASq_4 - 2 * ASq_1 * ASq_2, 2 * ASq_1 * ASq_1 + 2 * ASq_4 * ASq_4 - 1);
-        theta = arcsin(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_3);
-        psi = arctan2(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_4, 2 * ASq_1 * ASq_1 + 2 * ASq_2 * ASq_2 - 1);
+        # phi = arctan2(2 * ASq_3 * ASq_4 - 2 * ASq_1 * ASq_2, 2 * ASq_1 * ASq_1 + 2 * ASq_4 * ASq_4 - 1);
+        # theta = arcsin(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_3);
+        # psi = arctan2(2 * ASq_2 * ASq_3 - 2 * ASq_1 * ASq_4, 2 * ASq_1 * ASq_1 + 2 * ASq_2 * ASq_2 - 1);
      
 
         #print phi,theta,psi
-        return float(psi),float(theta),float(phi)
+        return psi, theta, phi
     
     def log(self):    
         psi,theta,phi = self.getEuler()          
-        self.logFile.write(('%s '*26+'\n')%(self.tcurrent,self.deltat,
+        self.logFile.write(('%s '*23+'\n')%(self.tcurrent,self.deltat,
                                               self.acc[0],self.acc[1],self.acc[2],
                                               self.mag[0],self.mag[1],self.mag[2],
                                               self.gyr[0],self.gyr[1],self.gyr[2],
-                                              self.gyrc[0],self.gyrc[1],self.gyrc[2],
-                                              self.gyr_ba[0],self.gyr_ba[1],self.gyr_ba[2], 
+                                              self.eInt[0],self.eInt[1],self.eInt[2], 
                                               self.earth_magnetic_field_x,self.earth_magnetic_field_z ,   
-                                              self.quat0,self.quat1,self.quat2,self.quat3,
+                                              self.quat[0],self.quat[1],self.quat[2],self.quat[3],
                                               psi,theta,phi))
         
         
+    """
+
+    Implementation of Madgwick's IMU and AHRS algorithms.
+
+    This Implementation is the python equivalent os this:
+    http://www.x-io.co.uk/node/8#open_source_ahrs_and_imu_algorithms
+    """
 
 
-def logIMU(print_ = True, log = False, logSleep = 0.1):
-    imu = IMU(log = log, logSleep = sleeping)
-    i=0
-    while True:
-        i+=1
-        if print_:
-            psi,theta,phi = imu.getEuler()
-            print '%10.7f %10.7f %10.7f'%(degrees(psi),degrees(theta),degrees(phi))
-        sleep(logSleep)
+    def UpdateMadgwickAHRS(self):
+        """ 
+        madgwickAHRS from https://github.com/xioTechnologies/Open-Source-AHRS-With-x-IMU
+        Algorithm AHRS update method. Requires gyroscope accelerometer and magnetometer data.
+         "gx" Gyroscope x axis measurement in radians/s.
+         "gy" Gyroscope y axis measurement in radians/s.
+         "gz" Gyroscope z axis measurement in radians/s.
+         "ax" Accelerometer x axis measurement in any calibrated units.
+         "ay" Accelerometer y axis measurement in any calibrated units.
+         "az" Accelerometer z axis measurement in any calibrated units.
+         "mx" Magnetometer x axis measurement in any calibrated units.
+         "my" Magnetometer y axis measurement in any calibrated units.
+         "mz" Magnetometer z axis measurement in any calibrated units.
+         
+         paremeters:
+          self.beta
+          self.deltat
 
-def timeIMU(niter = 1000):
-    
-    imu = IMU()
-    i=0
-    t0 = time()
-    while i < niter:
-        i+=1
-        print i
-        psi,theta,phi = imu.getEuler()
-    print time() - t0
+         input/output: self.quaternion
+        """ 
+        # short name local variable for readability
+        q1 = self.quat[0]
+        q2 = self.quat[1]
+        q3 = self.quat[2]
+        q4 = self.quat[3]
 
-def plotIMU(fileName = '_log_IMU'):
-    from mpl_toolkits.mplot3d import Axes3D
-    import matplotlib.pyplot as plt
+        ax = self.acc[0]
+        ay = self.acc[1]
+        az = self.acc[2]
+        gx = self.gyr[0]
+        gy = self.gyr[1]
+        gz = self.gyr[2]
+        mx = self.mag[0]
+        my = self.mag[1]
+        mz = self.mag[2]
 
-    f=open(fileName)
-    Tlog = list()
-    for line in f:
-        Tlog.append([float(a) for a in line.split()])
-    f.close()
-    Tlog = array(Tlog)
-    print Tlog[:,2]
-    fig2 = plt.figure()
-    ax = fig2.add_subplot(311)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,-3]))
-    ax = fig2.add_subplot(312)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,-2]))
-    ax = fig2.add_subplot(313)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,-1]))
+        # Auxiliary variables to avoid repeated arithmetic
+        _2q1 = 2. * q1
+        _2q2 = 2. * q2
+        _2q3 = 2. * q3
+        _2q4 = 2. * q4
+        _2q1q3 = 2. * q1 * q3
+        _2q3q4 = 2. * q3 * q4
+        q1q1 = q1 * q1
+        q1q2 = q1 * q2
+        q1q3 = q1 * q3
+        q1q4 = q1 * q4
+        q2q2 = q2 * q2
+        q2q3 = q2 * q3
+        q2q4 = q2 * q4
+        q3q3 = q3 * q3
+        q3q4 = q3 * q4
+        q4q4 = q4 * q4
 
-    plt.show()
+        # Normalise accelerometer measurement
+        norm = sqrt(ax * ax + ay * ay + az * az)
+        if (norm == 0.) raise
+        norm = 1. / norm        
+        ax *= norm
+        ay *= norm
+        az *= norm
 
-    fig2 = plt.figure()
-    ax = fig2.add_subplot(311)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,14]))
-    ax = fig2.add_subplot(312)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,15]))
-    ax = fig2.add_subplot(313)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,16]))
-    plt.show()
+        # Normalise magnetometer measurement
+        norm = sqrt(mx * mx + my * my + mz * mz)
+        if (norm == 0.) return 
+        norm = 1. / norm        
+        mx *= norm
+        my *= norm
+        mz *= norm
 
-    fig2 = plt.figure()
-    ax = fig2.add_subplot(311)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,11]))
-    ax = fig2.add_subplot(312)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,12]))
-    ax = fig2.add_subplot(313)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,13]))
-    plt.show()
- 
-    fig2 = plt.figure()
-    ax = fig2.add_subplot(211)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,17]))
-    ax = fig2.add_subplot(212)
-    ax.plot(Tlog[:,0],degrees(Tlog[:,18]))
-    plt.show()
+        # Reference direction of Earth's magnetic field
+        _2q1mx = 2. * q1 * mx
+        _2q1my = 2. * q1 * my
+        _2q1mz = 2. * q1 * mz
+        _2q2mx = 2. * q2 * mx
+        hx = mx * q1q1 - _2q1my * q4 + _2q1mz * q3 + mx * q2q2 + _2q2 * my * q3 + _2q2 * mz * q4 - mx * q3q3 - mx * q4q4
+        hy = _2q1mx * q4 + my * q1q1 - _2q1mz * q2 + _2q2mx * q3 - my * q2q2 + my * q3q3 + _2q3 * mz * q4 - my * q4q4
+        _2bx = sqrt(hx * hx + hy * hy)
+        _2bz = -_2q1mx * q3 + _2q1my * q2 + mz * q1q1 + _2q2mx * q4 - mz * q2q2 + _2q3 * my * q4 - mz * q3q3 + mz * q4q4
+        _4bx = 2. * _2bx
+        _4bz = 2. * _2bz
 
-def quat2matrix(quat):
-    q0=quat[0]
-    q1=quat[1]
-    q2=quat[2]
-    q3=quat[3]
-    
-    mat = array([[2*q0**2 - 1 + 2*q1**2, 2*(q1*q2 + q0*q3)     ,2*(q1*q3 - q0*q2)],
-                 [2*(q1*q2 - q0*q3)    , 2*q0**2 - 1 + 2*q2**2 ,2*(q2*q3 + q0*q1)],
-                 [2*(q1*q3 + q0*q2)    , 2*(q2*q3 - q0*q1)     ,2*q0**2 - 1 + 2*q3**2]])
-                 
-    return mat
+        # Gradient decent algorithm corrective step
+        s1 = -_2q3 * (2. * q2q4 - _2q1q3 - ax) + _2q2 * (2. * q1q2 + _2q3q4 - ay) - _2bz * q3 * (_2bx * (0.5 - q3q3 - q4q4) + _2bz * (q2q4 - q1q3) - mx) + (-_2bx * q4 + _2bz * q2) * (_2bx * (q2q3 - q1q4) + _2bz * (q1q2 + q3q4) - my) + _2bx * q3 * (_2bx * (q1q3 + q2q4) + _2bz * (0.5 - q2q2 - q3q3) - mz)
+        s2 = _2q4 * (2. * q2q4 - _2q1q3 - ax) + _2q1 * (2. * q1q2 + _2q3q4 - ay) - 4. * q2 * (1. - 2. * q2q2 - 2. * q3q3 - az) + _2bz * q4 * (_2bx * (0.5 - q3q3 - q4q4) + _2bz * (q2q4 - q1q3) - mx) + (_2bx * q3 + _2bz * q1) * (_2bx * (q2q3 - q1q4) + _2bz * (q1q2 + q3q4) - my) + (_2bx * q4 - _4bz * q2) * (_2bx * (q1q3 + q2q4) + _2bz * (0.5 - q2q2 - q3q3) - mz)
+        s3 = -_2q1 * (2. * q2q4 - _2q1q3 - ax) + _2q4 * (2. * q1q2 + _2q3q4 - ay) - 4. * q3 * (1. - 2. * q2q2 - 2. * q3q3 - az) + (-_4bx * q3 - _2bz * q1) * (_2bx * (0.5 - q3q3 - q4q4) + _2bz * (q2q4 - q1q3) - mx) + (_2bx * q2 + _2bz * q4) * (_2bx * (q2q3 - q1q4) + _2bz * (q1q2 + q3q4) - my) + (_2bx * q1 - _4bz * q3) * (_2bx * (q1q3 + q2q4) + _2bz * (0.5 - q2q2 - q3q3) - mz)
+        s4 = _2q2 * (2. * q2q4 - _2q1q3 - ax) + _2q3 * (2. * q1q2 + _2q3q4 - ay) + (-_4bx * q4 + _2bz * q2) * (_2bx * (0.5 - q3q3 - q4q4) + _2bz * (q2q4 - q1q3) - mx) + (-_2bx * q1 + _2bz * q3) * (_2bx * (q2q3 - q1q4) + _2bz * (q1q2 + q3q4) - my) + _2bx * q2 * (_2bx * (q1q3 + q2q4) + _2bz * (0.5 - q2q2 - q3q3) - mz)
+        norm = 1. / sqrt(s1 * s1 + s2 * s2 + s3 * s3 + s4 * s4)    # normalise step magnitude
+        s1 *= norm
+        s2 *= norm
+        s3 *= norm
+        s4 *= norm
 
-def plotIMU3d():
-    from mpl_toolkits.mplot3d import Axes3D
-    import matplotlib.pyplot as plt
-    import matplotlib
-    matplotlib.interactive(True)
-    
-    
-    imu = IMU()
-   
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d') 
- 
-    while True:
-        imu.getEuler()
-        mat = quat2matrix(imu.quat)
+        # Compute rate of change of quaternion
+        qDot1 = 0.5 * (-q2 * gx - q3 * gy - q4 * gz) - self.beta * s1
+        qDot2 = 0.5 * (q1 * gx + q3 * gz - q4 * gy) - self.beta * s2
+        qDot3 = 0.5 * (q1 * gy - q2 * gz + q4 * gx) - self.beta * s3
+        qDot4 = 0.5 * (q1 * gz + q2 * gy - q3 * gx) - self.beta * s4
+
+        # Integrate to yield quaternion
+        q1 += qDot1 * self.deltat
+        q2 += qDot2 * self.deltat
+        q3 += qDot3 * self.deltat
+        q4 += qDot4 * self.deltat
+        norm = 1. / sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)    
+        self.quat[0] = q1 * norm
+        self.quat[1] = q2 * norm
+        self.quat[2] = q3 * norm
+        self.quat[3] = q4 * norm
+
+
+
         
-        for line in ax.lines : line.remove() 
-        vx = ax.plot([0,mat[0,0]],[0,mat[0,1]],[0,mat[0,2]])
-        vy = ax.plot([0,mat[1,0]],[0,mat[1,1]],[0,mat[1,2]])
-        vz = ax.plot([0,mat[2,0]],[0,mat[2,1]],[0,mat[2,2]])
+    def UpdateMadgwickIMU(self):
+        """
+        madgwickAHRS from https://github.com/xioTechnologies/Open-Source-AHRS-With-x-IMU
+        Algorithm IMU update method. Requires only gyroscope and accelerometer data.
+        "gx" Gyroscope x axis measurement in radians/s.
+        "gy" Gyroscope y axis measurement in radians/s.
+        "gz" Gyroscope z axis measurement in radians/s.
+        "ax" Accelerometer x axis measurement in any calibrated units.
+        "ay" Accelerometer y axis measurement in any calibrated units.
+        "az" Accelerometer z axis measurement in any calibrated units.
+         
+        parameters:
+          self.beta
+          self.deltat
+
+        input/output:
+          self.quaternion
+         """
+        # short name local variable for readability
+        q1 = self.quat[0]
+        q2 = self.quat[1]
+        q3 = self.quat[2]
+        q4 = self.quat[3]   
+
+        ax = self.acc[0]
+        ay = self.acc[1]
+        az = self.acc[2]
+        gx = self.gyr[0]
+        gy = self.gyr[1]
+        gz = self.gyr[2]
+
+
+        # Auxiliary variables to avoid repeated arithmetic
+        _2q1 = 2f * q1
+        _2q2 = 2f * q2
+        _2q3 = 2f * q3
+        _2q4 = 2f * q4
+        _4q1 = 4f * q1
+        _4q2 = 4f * q2
+        _4q3 = 4f * q3
+        _8q2 = 8f * q2
+        _8q3 = 8f * q3
+        q1q1 = q1 * q1
+        q2q2 = q2 * q2
+        q3q3 = q3 * q3
+        q4q4 = q4 * q4
+
+        # Normalise accelerometer measurement
+        norm = sqrt(ax * ax + ay * ay + az * az)
+        if (norm == 0f) raise 
+        norm = 1 / norm        
+        ax *= norm
+        ay *= norm
+        az *= norm
+
+        # Gradient decent algorithm corrective step
+        s1 = _4q1 * q3q3 + _2q3 * ax + _4q1 * q2q2 - _2q2 * ay
+        s2 = _4q2 * q4q4 - _2q4 * ax + 4. * q1q1 * q2 - _2q1 * ay - _4q2 + _8q2 * q2q2 + _8q2 * q3q3 + _4q2 * az
+        s3 = 4. * q1q1 * q3 + _2q1 * ax + _4q3 * q4q4 - _2q4 * ay - _4q3 + _8q3 * q2q2 + _8q3 * q3q3 + _4q3 * az
+        s4 = 4. * q2q2 * q4 - _2q2 * ax + 4. * q3q3 * q4 - _2q3 * ay
+        norm = 1. / sqrt(s1 * s1 + s2 * s2 + s3 * s3 + s4 * s4)    
+        s1 *= norm
+        s2 *= norm
+        s3 *= norm
+        s4 *= norm
+
+        # Compute rate of change of quaternion
+        qDot1 = 0.5 * (-q2 * gx - q3 * gy - q4 * gz) - self.beta * s1
+        qDot2 = 0.5 * (q1 * gx + q3 * gz - q4 * gy) - self.beta * s2
+        qDot3 = 0.5 * (q1 * gy - q2 * gz + q4 * gx) - self.beta * s3
+        qDot4 = 0.5 * (q1 * gz + q2 * gy - q3 * gx) - self.beta * s4
+
+        # Integrate to yield quaternion
+        q1 += qDot1 * self.deltat
+        q2 += qDot2 * self.deltat
+        q3 += qDot3 * self.deltat
+        q4 += qDot4 * self.deltat
+        norm = 1. / sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)    
+        self.quat[0] = q1 * norm
+        self.quat[1] = q2 * norm
+        self.quat[2] = q3 * norm
+        self.quat[3] = q4 * norm
+
+
+
+
+
+    def UpdateMahonyAHRS(self, gx, gy, gz, ax,  ay,  az,  mx,  my,  mz):
+        """ 
+        MahonyAHRS from https://github.com/xioTechnologies/Open-Source-AHRS-With-x-IMU
+        Algorithm AHRS update method. Requires gyroscope accelerometer and magnetometer data.
+         "gx" Gyroscope x axis measurement in radians/s.
+         "gy" Gyroscope y axis measurement in radians/s.
+         "gz" Gyroscope z axis measurement in radians/s.
+         "ax" Accelerometer x axis measurement in any calibrated units.
+         "ay" Accelerometer y axis measurement in any calibrated units.
+         "az" Accelerometer z axis measurement in any calibrated units.
+         "mx" Magnetometer x axis measurement in any calibrated units.
+         "my" Magnetometer y axis measurement in any calibrated units.
+         "mz" Magnetometer z axis measurement in any calibrated units.
+         
+         paremeters:
+          self.deltat
+          self.kp   Algorithm proportional gain  governs rate of convergence to accelerometer/magnetometer
+          self.ki   Algorithm integral gain  governs rate of convergence of gyroscope biases
+
+         input/output: 
+           self.quaternion
+           self.eInt
+        """ 
+            
+        # short name local variable for readability
+        q1 = self.quat[0]
+        q2 = self.quat[1]
+        q3 = self.quat[2]
+        q4 = self.quat[3]
+
+        ax = self.acc[0]
+        ay = self.acc[1]
+        az = self.acc[2]
+        gx = self.gyr[0]
+        gy = self.gyr[1]
+        gz = self.gyr[2]
+        mx = self.mag[0]
+        my = self.mag[1]
+        mz = self.mag[2]
+
+
+        # Auxiliary variables to avoid repeated arithmetic
+        q1q1 = q1 * q1
+        q1q2 = q1 * q2
+        q1q3 = q1 * q3
+        q1q4 = q1 * q4
+        q2q2 = q2 * q2
+        q2q3 = q2 * q3
+        q2q4 = q2 * q4
+        q3q3 = q3 * q3
+        q3q4 = q3 * q4
+        q4q4 = q4 * q4   
+
+        # Normalise accelerometer measurement
+        norm = sqrt(ax * ax + ay * ay + az * az)
+        if (norm == 0.) raise
+        norm = 1. / norm        
+        ax *= norm
+        ay *= norm
+        az *= norm
+
+        # Normalise magnetometer measurement
+        norm = sqrt(mx * mx + my * my + mz * mz)
+        if (norm == 0.) return 
+        norm = 1. / norm        
+        mx *= norm
+        my *= norm
+        mz *= norm
+
+        # Reference direction of Earth's magnetic field
+        hx = 2. * mx * (0.5. - q3q3 - q4q4) + 2. * my * (q2q3 - q1q4) + 2. * mz * (q2q4 + q1q3)
+        hy = 2. * mx * (q2q3 + q1q4) + 2. * my * (0.5 - q2q2 - q4q4) + 2. * mz * (q3q4 - q1q2)
+        bx = sqrt((hx * hx) + (hy * hy))
+        bz = 2. * mx * (q2q4 - q1q3) + 2. * my * (q3q4 + q1q2) + 2f * mz * (0.5 - q2q2 - q3q3)
+
+        # Estimated direction of gravity and magnetic field
+        vx = 2. * (q2q4 - q1q3)
+        vy = 2. * (q1q2 + q3q4)
+        vz = q1q1 - q2q2 - q3q3 + q4q4
+        wx = 2. * bx * (0.5 - q3q3 - q4q4) + 2. * bz * (q2q4 - q1q3)
+        wy = 2. * bx * (q2q3 - q1q4) + 2. * bz * (q1q2 + q3q4)
+        wz = 2. * bx * (q1q3 + q2q4) + 2. * bz * (0.5 - q2q2 - q3q3)  
+
+        # Error is cross product between estimated direction and measured direction of gravity
+        ex = (ay * vz - az * vy) + (my * wz - mz * wy)
+        ey = (az * vx - ax * vz) + (mz * wx - mx * wz)
+        ez = (ax * vy - ay * vx) + (mx * wy - my * wx)
+        if Ki > 0.:
+            self.eInt[0] += ex      # accumulate integral error
+            self.eInt[1] += ey
+            self.eInt[2] += ez
+        else:
+            self.eInt[0] = 0.0     # prevent integral wind up
+            self.eInt[1] = 0.0
+            self.eInt[2] = 0.0
+
+        # Apply feedback terms
+        gx = gx + self.Kp * ex + self.Ki * self.eInt[0]
+        gy = gy + self.Kp * ey + self.Ki * self.eInt[1]
+        gz = gz + self.Kp * ez + self.Ki * self.eInt[2]
+
+        # Integrate rate of change of quaternion
+        pa = q2
+        pb = q3
+        pc = q4
+        q1 = q1 + (-q2 * gx - q3 * gy - q4 * gz) * (0.5 * self.deltat)
+        q2 = pa + (q1 * gx + pb * gz - pc * gy) * (0.5 * self.deltat)
+        q3 = pb + (q1 * gy - pa * gz + pc * gx) * (0.5 * self.deltat)
+        q4 = pc + (q1 * gz + pa * gy - pb * gx) * (0.5 * self.deltat)
+
+        # Normalise quaternion
+        norm = sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)
+        norm = 1.0 / norm
+        self.quat[0] = q1 * norm
+        self.quat[1] = q2 * norm
+        self.quat[2] = q3 * norm
+        self.quat[3] = q4 * norm
+
+
+            
+    def UpdateMahonyIMU(self):
+        """
+        MahonyIMU from https://github.com/xioTechnologies/Open-Source-AHRS-With-x-IMU
+        Algorithm IMU update method. Requires only gyroscope and accelerometer data.
+        "gx" Gyroscope x axis measurement in radians/s.
+        "gy" Gyroscope y axis measurement in radians/s.
+        "gz" Gyroscope z axis measurement in radians/s.
+        "ax" Accelerometer x axis measurement in any calibrated units.
+        "ay" Accelerometer y axis measurement in any calibrated units.
+        "az" Accelerometer z axis measurement in any calibrated units.
+         
+        parameters:
+          self.beta
+          self.deltat
+
+        input/output:
+          self.quaternion
+         """
+        # short name local variable for readability
+        q1 = self.quat[0]
+        q2 = self.quat[1]
+        q3 = self.quat[2]
+        q4 = self.quat[3]   
         
-        plt.draw()
-        sleep(0.5)
-
-def plotIMU3d_2():
-
-    
-    imu = IMU()
-
-
-    from pyqtgraph.Qt import QtGui
-    app = QtGui.QApplication([])
-
-    ## build a QApplication before building other widgets
-    #import pyqtgraph as pg
-    #pg.mkQApp()
-    
-    ## make a widget for displaying 3D objects
-    import pyqtgraph.opengl as gl
-    view = gl.GLViewWidget()
-    return
-    view.opts['distance'] = 20
-    view.show()
-
-    return
-    ax = gl.GLAxisItem()
-    ax.setSize(5,5,5)
-    view.addItem(ax)
-    
-    b = gl.GLBoxItem()
-    view.addItem(b)
-    
-    ax2 = gl.GLAxisItem()
-    ax2.setParentItem(b)
-
-    QtGui.QApplication.instance().exec_()
-
-    return
-
-    while True:
-        psi,theta,phi= imu.update()
-        b.rotate(degrees(phi),1,0,0,local = True)
-        b.rotate(degrees(theta),0,0,1,local = True)
-        b.rotate(degrees(psi),0,1,0,local = True)
-
-        sleep(0.5)
-        
-    
-def liveplot3d(imu):
-
-    from mpl_toolkits.mplot3d import Axes3D
-    import matplotlib.pyplot as plt
-    import matplotlib.animation as animation     
-   
-    fig = plt.figure()
-
-    ax1 = fig.add_subplot(321)
-    ax2 = fig.add_subplot(323)
-    ax3 = fig.add_subplot(325)
-    ax4 = fig.add_subplot(122, projection='3d')
-    # plt.tight_layout()
-    
-    linePsi, = ax1.plot([],[])
-    lineTheta, = ax2.plot([],[])
-    linePhi, = ax3.plot([],[])
-    plot3d = ax4.scatter([],[],[], animated=True)
-
-    # ax.set_ylim(-1.1, 1.1)
-    # ax.set_xlim(0, 5)
-    # ax.grid()
-    Tpsi, Tpsi, Tphi = list(),list(),list()
-    def run(data):
-        # update the data
-        psi,theta,phi =data
-        
-        Tpsi.append(psi)
-        Ttheta.append(theta)
-        Tphi.append(phi)
-        x= range(len(Tpsi))
-        # xmin, xmax = ax.get_xlim()
-
-        # if t >= xmax:
-        #     ax.set_xlim(xmin, 2*xmax)
-        #     ax.figure.canvas.draw()
-        lineTheta.set_data(x, Ttheta)
-        linePsi.set_data(x, Ttheta)
-        linePhi.set_data(x, Ttheta)
-        plot3d.set_offsets([Tpsi,Ttheta])
-        plot3d.set_3d_properties(Tphi,'z')
-
-        plt.draw()
-        return linePsi,lineTheta,linePhi,plot3d
-
-    def init():
-        lineTheta.set_data([], [])
-        linePsi.set_data([], [])
-        linePhi.set_data([], [])
-        plot3d.set_offsets([[], []])
-        plot3d.set_3d_properties([],'z')
-
-        return linePsi,lineTheta,linePhi,plot3d
-
-    
-    ani = animation.FuncAnimation(fig, run,imu.getEuler,  blit=True, interval=10,
-        repeat=False, init_func = init)
-    fig.show()
+        ax = self.acc[0]
+        ay = self.acc[1]
+        az = self.acc[2]
+        gx = self.gyr[0]
+        gy = self.gyr[1]
+        gz = self.gyr[2]
 
 
+        #Normalise accelerometer measurement
+        norm = sqrt(ax * ax + ay * ay + az * az)
+        if (norm == 0.) raise
+        norm = 1. / norm 
+        ax *= norm
+        ay *= norm
+        az *= norm
 
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
-import numpy.ma as ma
-FLOOR = -1
-CEILING = 1
+        # Estimated direction of gravity
+        vx = 2.0 * (q2 * q4 - q1 * q3)
+        vy = 2.0 * (q1 * q2 + q3 * q4)
+        vz = q1 * q1 - q2 * q2 - q3 * q3 + q4 * q4
 
-class AnimatedScatter(object):
-    def __init__(self, imu):
-        self.imu = imu
-        self.angle = 0
-        nmax = 1000
-        self.data = np.zeros((nmax,4))
-        self.data = ma.masked_array(self.data)
-        self.data[1:,:] = ma.masked
-        self.update_Data(0)
+        # Error is cross product between estimated direction and measured direction of gravity
+        ex = (ay * vz - az * vy)
+        ey = (az * vx - ax * vz)
+        ez = (ax * vy - ay * vx)
+        if Ki > 0. :
+            self.eInt[0] += ex      # accumulate integral error
+            self.eInt[1] += ey
+            self.eInt[2] += ez
+        else:
+            self.eInt[0] = 0.0     # prevent integral wind up
+            self.eInt[1] = 0.0
+            self.eInt[2] = 0.0
 
-        self.fig = plt.figure()
-        self.axmag3d = self.fig.add_subplot(122,projection = '3d')
-        self.axmag = self.fig.add_subplot(121)
-        self.axmag.grid()
-        self.ani = animation.FuncAnimation(self.fig, self.update, interval=10, 
-                                           init_func=self.setup_plot, blit=True)
+        # Apply feedback terms
+        gx = gx + self.Kp * ex + self.Ki * self.eInt[0]
+        gy = gy + self.Kp * ey + self.Ki * self.eInt[1]
+        gz = gz + self.Kp * ez + self.Ki * self.eInt[2]
 
-    def change_angle(self):
-        self.angle = (self.angle + 1)%360
+        # Integrate rate of change of quaternion
+        pa = q2
+        pb = q3
+        pc = q4
+        q1 = q1 + (-q2 * gx - q3 * gy - q4 * gz) * (0.5 * self.deltat)
+        q2 = pa + (q1 * gx + pb * gz - pc * gy) * (0.5 * self.deltat)
+        q3 = pb + (q1 * gy - pa * gz + pc * gx) * (0.5 * self.deltat)
+        q4 = pc + (q1 * gz + pa * gy - pb * gx) * (0.5 * self.deltat)
 
-    def setup_plot(self):
-        
-        accX,accy,accz,magx,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
-        t0 = time()
-        self.scatMag3d = self.axmag3d.scatter([magx], [magy], [magz], s=20)
-        self.linemagx, = self.axmag.plot([0], [magx],'-')
-        self.linemagy, = self.axmag.plot([0], [magy],'-')
-        self.linemagz, = self.axmag.plot([0], [magz],'-')
-
-
-
-        self.axmag3d.set_xlim3d(FLOOR, CEILING)
-        self.axmag3d.set_ylim3d(FLOOR, CEILING)
-        self.axmag3d.set_zlim3d(FLOOR, CEILING)
-
-
-        self.axmag.set_ylim(-1,1)
-        self.t0 = t0
-        self.tmax = 10
-        self.axmag.set_xlim(0,10)
-
-        return self.scatMag3d,self.linemagx,self.linemagy,self.linemagz
-
-    def update_Data(self,i):
-        accX,accy,accz,magx,magy,magz,gyrX,gyry,gyrz = self.imu.getRawData()
-        t=time()
-        print t,magx,magy,magz
-        self.data[i,0] = t
-        self.data[i,1] = magx
-        self.data[i,2] = magy
-        self.data[i,3] = magz
-        # self.data[i,0] = ma.nomask
-        # print 'res'
+        # Normalise quaternion
+        norm = sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)
+        norm = 1.0 / norm
+        self.quat[0] = q1 * norm
+        self.quat[1] = q2 * norm
+        self.quat[2] = q3 * norm
+        self.quat[3] = q4 * norm
 
 
-    def update(self, i):
-        self.update_Data(i)
-        self.data[i,0]= self.data[i,0]-self.t0
-        data = self.data
-        # data = np.transpose(data)
-
-        # self.scatMag3d.set_offsets(data[:,1:3])
-        # self.scatMag3d.set_3d_properties(data[:,3],'z')
-        self.scatMag3d._offsets3d = (data[:,1],data[:,2],data[:,3])
-
-        self.linemagx.set_data(data[:,0],data[:,1])
-        self.linemagy.set_data(data[:,0],data[:,2])
-        self.linemagz.set_data(data[:,0],data[:,3])
-
-        if data[i,0] >= self.tmax:
-            self.tmax = self.tmax+10
-            self.axmag.set_xlim(0, self.tmax)
-            self.axmag.figure.canvas.draw()
-
-        # self.change_angle()
-        # self.ax.view_init(30,self.angle)
-        plt.draw()
-        return self.scatMag3d,self.linemagx,self.linemagy,self.linemagz
-
-    def show(self):
-        plt.show()
-
-
-# if __name__ == "__main__":
-#     #logIMU()
-# #    plotIMU()
-#     plotIMU3d_2()
-
-
-if __name__ == '__main__':
-    a = AnimatedScatter()
-    a.show()
