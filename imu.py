@@ -263,7 +263,7 @@ class IMU():
 
         # Normalise accelerometer measurement
         norm = sqrt(ax * ax + ay * ay + az * az)
-        if (norm == 0.) raise
+        if (norm == 0.) : raise
         norm = 1. / norm        
         ax *= norm
         ay *= norm
@@ -271,7 +271,7 @@ class IMU():
 
         # Normalise magnetometer measurement
         norm = sqrt(mx * mx + my * my + mz * mz)
-        if (norm == 0.) return 
+        if (norm == 0.) : raise 
         norm = 1. / norm        
         mx *= norm
         my *= norm
@@ -369,7 +369,7 @@ class IMU():
 
         # Normalise accelerometer measurement
         norm = sqrt(ax * ax + ay * ay + az * az)
-        if (norm == 0f) raise 
+        if (norm == 0f) : raise 
         norm = 1 / norm        
         ax *= norm
         ay *= norm
@@ -462,7 +462,7 @@ class IMU():
 
         # Normalise accelerometer measurement
         norm = sqrt(ax * ax + ay * ay + az * az)
-        if (norm == 0.) raise
+        if (norm == 0.) : raise
         norm = 1. / norm        
         ax *= norm
         ay *= norm
@@ -470,7 +470,7 @@ class IMU():
 
         # Normalise magnetometer measurement
         norm = sqrt(mx * mx + my * my + mz * mz)
-        if (norm == 0.) return 
+        if (norm == 0.)  : raise 
         norm = 1. / norm        
         mx *= norm
         my *= norm
@@ -561,7 +561,7 @@ class IMU():
 
         #Normalise accelerometer measurement
         norm = sqrt(ax * ax + ay * ay + az * az)
-        if (norm == 0.) raise
+        if (norm == 0.) : raise
         norm = 1. / norm 
         ax *= norm
         ay *= norm
