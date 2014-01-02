@@ -57,13 +57,13 @@ class IMU():
         self.beta = 0.1
 
         if algo == 0 :
-            self.update = UpdateMadgwickAHRS
+            self.update = self.UpdateMadgwickAHRS
         elif algo == 1 :
-            self.update = UpdateMadgwickIMU
+            self.update = self.UpdateMadgwickIMU
         elif algo == 3 :
-            self.update = UpdateMahonyAHRS
+            self.update = self.UpdateMahonyAHRS
         elif algo == 4 :
-            self.update = UpdateMahonyIMU
+            self.update = self.UpdateMahonyIMU
 
 
         self.quat = [1.,0.,0.,0.]
