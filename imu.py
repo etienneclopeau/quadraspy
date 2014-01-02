@@ -409,7 +409,7 @@ class IMU():
 
 
 
-    def UpdateMahonyAHRS(self, gx, gy, gz, ax,  ay,  az,  mx,  my,  mz):
+    def UpdateMahonyAHRS(self):
         """ 
         MahonyAHRS from https://github.com/xioTechnologies/Open-Source-AHRS-With-x-IMU
         Algorithm AHRS update method. Requires gyroscope accelerometer and magnetometer data.
