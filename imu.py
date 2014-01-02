@@ -52,8 +52,8 @@ class IMU():
 
 
 
-        self.kp = 2
-        self.ki = 0.005
+        self.Kp = 2
+        self.Ki = 0.005
         self.beta = 0.1
 
         if algo == 0 :
