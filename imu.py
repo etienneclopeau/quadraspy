@@ -477,7 +477,7 @@ class IMU():
         mz *= norm
 
         # Reference direction of Earth's magnetic field
-        hx = 2. * mx * (0.5. - q3q3 - q4q4) + 2. * my * (q2q3 - q1q4) + 2. * mz * (q2q4 + q1q3)
+        hx = 2. * mx * (0.5 - q3q3 - q4q4) + 2. * my * (q2q3 - q1q4) + 2. * mz * (q2q4 + q1q3)
         hy = 2. * mx * (q2q3 + q1q4) + 2. * my * (0.5 - q2q2 - q4q4) + 2. * mz * (q3q4 - q1q2)
         bx = sqrt((hx * hx) + (hy * hy))
         bz = 2. * mx * (q2q4 - q1q3) + 2. * my * (q3q4 + q1q2) + 2f * mz * (0.5 - q2q2 - q3q3)
