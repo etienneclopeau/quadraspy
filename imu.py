@@ -157,7 +157,7 @@ class IMU():
         return self.eInt
 
     def getEarth_mag(self):
-         """
+        """
         return the actuel estimated earth magnetic field
         this is used for remote plotting
         """
