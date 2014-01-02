@@ -369,7 +369,7 @@ class IMU():
 
         # Normalise accelerometer measurement
         norm = sqrt(ax * ax + ay * ay + az * az)
-        if (norm == 0f) : raise 
+        if (norm == 0.) : raise 
         norm = 1. / norm        
         ax *= norm
         ay *= norm
