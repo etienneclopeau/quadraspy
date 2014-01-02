@@ -161,7 +161,7 @@ class IMU():
         return the actuel estimated earth magnetic field
         this is used for remote plotting
         """
-       return self.earth_magnetic_field_x,self.earth_magnetic_field_z
+        return self.earth_magnetic_field_x,self.earth_magnetic_field_z
 
     def getEuler(self):
         quat0 =  self.quat[0]
