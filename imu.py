@@ -496,7 +496,7 @@ class IMU():
         ex = (ay * vz - az * vy) + (my * wz - mz * wy)
         ey = (az * vx - ax * vz) + (mz * wx - mx * wz)
         ez = (ax * vy - ay * vx) + (mx * wy - my * wx)
-        if Ki > 0.:
+        if self.Ki > 0.:
             self.eInt[0] += ex      # accumulate integral error
             self.eInt[1] += ey
             self.eInt[2] += ez
@@ -578,7 +578,7 @@ class IMU():
         ex = (ay * vz - az * vy)
         ey = (az * vx - ax * vz)
         ez = (ax * vy - ay * vx)
-        if Ki > 0. :
+        if self.Ki > 0. :
             self.eInt[0] += ex      # accumulate integral error
             self.eInt[1] += ey
             self.eInt[2] += ez
