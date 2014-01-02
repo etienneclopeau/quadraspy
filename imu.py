@@ -353,15 +353,15 @@ class IMU():
 
 
         # Auxiliary variables to avoid repeated arithmetic
-        _2q1 = 2f * q1
-        _2q2 = 2f * q2
-        _2q3 = 2f * q3
-        _2q4 = 2f * q4
-        _4q1 = 4f * q1
-        _4q2 = 4f * q2
-        _4q3 = 4f * q3
-        _8q2 = 8f * q2
-        _8q3 = 8f * q3
+        _2q1 = 2. * q1
+        _2q2 = 2. * q2
+        _2q3 = 2. * q3
+        _2q4 = 2. * q4
+        _4q1 = 4. * q1
+        _4q2 = 4. * q2
+        _4q3 = 4. * q3
+        _8q2 = 8. * q2
+        _8q3 = 8. * q3
         q1q1 = q1 * q1
         q2q2 = q2 * q2
         q3q3 = q3 * q3
@@ -370,7 +370,7 @@ class IMU():
         # Normalise accelerometer measurement
         norm = sqrt(ax * ax + ay * ay + az * az)
         if (norm == 0f) : raise 
-        norm = 1 / norm        
+        norm = 1. / norm        
         ax *= norm
         ay *= norm
         az *= norm
