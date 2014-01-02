@@ -56,9 +56,9 @@ class IMU():
         self.Ki = 0.005
         self.beta = 0.1
 
-        if algo == 0 :
+        if algo == 1 :
             self.update = self.UpdateMadgwickAHRS
-        elif algo == 1 :
+        elif algo == 2 :
             self.update = self.UpdateMadgwickIMU
         elif algo == 3 :
             self.update = self.UpdateMahonyAHRS
