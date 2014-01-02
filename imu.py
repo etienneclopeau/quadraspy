@@ -38,6 +38,8 @@ class IMU():
             self.logFile = open(logFileName,'w')
         
 
+        self.deltat = 0.
+        self.tcurrent = 0.
         if simu == False:
             from capteurs import getCapteurs
             self.getMeasurements = self.getMeasurements_real
@@ -68,7 +70,7 @@ class IMU():
         self.earth_magnetic_field_x = 1. # orientation of earth magnetic field in ground coordinates
         self.earth_magnetic_field_z = 0. 
         self.eInt = [0.,0.,0.]
-        self.deltat = 0.
+
         self.running = True
 
 
