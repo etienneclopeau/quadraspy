@@ -40,9 +40,9 @@ class IMU():
 
         self.deltat = 0.
         self.tcurrent = 0.
-        self.acc = [0,0,0]
-        self.gyr = [0,0,0]
-        self.mag = [0,0,0]
+        self.acc = array([0,0,0])
+        self.gyr = array([0,0,0])
+        self.mag = array([0,0,0])
         if simu == False:
             from capteurs import getCapteurs
             self.getMeasurements = self.getMeasurements_real
