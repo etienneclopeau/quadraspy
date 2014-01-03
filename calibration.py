@@ -235,7 +235,8 @@ def ellipsoidFit_DistanceSphere(Th):
     phi0 = 0
     
     
-    def costFunction((theta,psi,phi,a,b,c,cx,cy,cz)): 
+    def costFunction(x): 
+        (theta,psi,phi,a,b,c,cx,cy,cz) = x
         cost = 0.
         #transformation en fonction des parametres de l'ellipse pour se ramener a une sphere:
         Mat = array(  \
@@ -251,7 +252,7 @@ def ellipsoidFit_DistanceSphere(Th):
         for point in Thcal:
             cost += abs(norm(point)-1.)
             #cost += (norm(point)-1.)**2
-        print cost
+        print cost,theta,psi,phi,a,b,c,cx,cy,cz
         return cost
     
     x0 = (theta0,psi0,phi0,a0,b0,c0,cx0,cy0,cz0)
@@ -271,9 +272,11 @@ def ellipsoidFit_DistanceEllipsoide(Th):
     psi0 = arctan2(evecs[2,1]/cos(theta0),evecs[2,2]/cos(theta0))
     phi0 = arctan2(evecs[1,0]/cos(theta0),evecs[0,0]/cos(theta0))
     phi0,theta0,psi0 = 0,0,0
+    print 'test'
     
     
-    def costFunction((theta,psi,phi,a,b,c,cx,cy,cz)): 
+    def costFunction(x): 
+        (theta,psi,phi,a,b,c,cx,cy,cz) = x
         cost = 0.
         #transformation en fonction des parametres de l'ellipse pour se ramene a une sphere:
         Mat = array(  \
@@ -345,12 +348,92 @@ def getCalData(fileName):
     return Mat,center,r
 
 
-if __name__ == "__main__":        
-    #logHvalues('maglog.dat',runningtime = 30)    
-    Th = getData('log/logMagForCalib.dat')
+
+import numpy
+
+def smooth(x,window_len=11,window='hanning'):
+    """smooth the data using a window with requested size.
+    
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal 
+    (with the window size) in both ends so that transient parts are minimized
+    in the begining and end part of the output signal.
+    
+    input:
+        x: the input signal 
+        window_len: the dimension of the smoothing window; should be an odd integer
+        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+            flat window will produce a moving average smoothing.
+
+    output:
+        the smoothed signal
+        
+    example:
+
+    t=linspace(-2,2,0.1)
+    x=sin(t)+randn(len(t))*0.1
+    y=smooth(x)
+    
+    see also: 
+    
+    numpy.hanning, numpy.hamming, numpy.bartlett, numpy.blackman, numpy.convolve
+    scipy.signal.lfilter
+ 
+    TODO: the window parameter could be the window itself if an array instead of a string
+    NOTE: length(output) != length(input), to correct this: return y[(window_len/2-1):-(window_len/2)] instead of just y.
+    """
+
+    if x.ndim != 1:
+        raise ValueError, "smooth only accepts 1 dimension arrays."
+
+    if x.size < window_len:
+        raise ValueError, "Input vector needs to be bigger than window size."
+
+
+    if window_len<3:
+        return x
+
+
+    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+
+
+    s=numpy.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
+    #print(len(s))
+    if window == 'flat': #moving average
+        w=numpy.ones(window_len,'d')
+    else:
+        w=eval('numpy.'+window+'(window_len)')
+
+    y=numpy.convolve(w/w.sum(),s,mode='valid')
+    return y
+
+
+
+if __name__ == "__main__":     
+    # from pylab import *
+    from numpy import zeros
+    #logHvalues('maglog.dat',runningtime = 30)   
+    print 'read data' 
+    # Th = getData('log/logMagForCalib.dat')
+    Th = getData('log/logAccForCalib.dat')
+    plot(Th[:,0])
+    plot(Th[:,1])
+    plot(Th[:,2])
+    nval = Th.shape[0]
+    wlen = 5
+    Thf = zeros((nval+wlen-1,3))
+    Thf[:,0] = smooth(Th[:,0],wlen)
+    Thf[:,1] = smooth(Th[:,1],wlen)
+    Thf[:,2] = smooth(Th[:,2],wlen)
+    # plot(Thf[:,0])
+    # plot(Thf[:,1])
+    # plot(Thf[:,2])
+    # show()
     #plot(Th)
-#    ellipsoidFit_DistanceSphere(Th)
-    ellipsoidFit_DistanceEllipsoide(Th)
+    print 'lancement opti'
+    # ellipsoidFit_DistanceSphere(Thf)
+    ellipsoidFit_DistanceEllipsoide(Thf)
     
   #   theta,psi,phi,a,b,c,cx,cy,cz = [1.16461960e-01 , -1.22692113e-01 ,  5.51200083e-01 ,  5.52765112e+02,
   #  5.21074288e+02 ,  4.48637709e+02 ,  1.45520786e+02 , -5.25322073e+01,

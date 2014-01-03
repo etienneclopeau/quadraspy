@@ -2,12 +2,13 @@
 #lancer: 
 """export PYRO_SERIALIZER=pickle
 export PYRO_SERIALIZERS_ACCEPTED=pickle
-python -m Pyro4.naming -n 192.168.1.98
+python -m Pyro4.naming -n 192.168.1.98 &
+sudo python remote_raspberry.py
 """
 import Pyro4
 from imu import IMU
 
-imu=IMU(algo = 1)
+imu=IMU(algo = 3)
 
 #Pyro4.naming.startNS(host=None, port=None, enableBroadcast=True, bchost=None, bcport=None, unixsocket=None, nathost=None, natport=None)
 Pyro4.config.SERIALIZERS_ACCEPTED.add('pickle')
