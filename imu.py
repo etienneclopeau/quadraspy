@@ -50,10 +50,12 @@ class IMU():
         
         self.getMeasurements()
 
-
+        # for algo = 3
+        # self.kp   Algorithm proportional gain  governs rate of convergence to accelerometer/magnetometer
+        # self.ki   Algorithm integral gain  governs rate of convergence of gyroscope biases
 
         self.Kp = 2
-        self.Ki = 0.005
+        self.Ki = 0.5
         self.beta = 0.1
 
         if algo == 1 :
@@ -119,6 +121,7 @@ class IMU():
         self.acc = self.accelerometer.getAcc()
         self.gyr = self.gyrometer.getGyr()
         self.mag = self.magnetometer.getMag()
+
 
     def getMeasurements_simu(self):
         """

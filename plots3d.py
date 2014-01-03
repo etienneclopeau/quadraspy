@@ -7,6 +7,8 @@ from numpy.linalg import norm as npnorm
 
 from imu import IMU
 
+option = 'acc'  # 'mag' or 'acc'
+
 
 import Pyro4
 # import time
@@ -39,7 +41,7 @@ view.setWindowTitle('magnetometers')
 g = gl.GLGridItem()
 view.addItem(g)
 
-pos3 = np.zeros((10000,3))
+pos3 = np.zeros((20000,3))
 sp3 = gl.GLScatterPlotItem(pos=pos3, color=(1,1,1,.3), size=0.1, pxMode=False)
 
 view.addItem(sp3)
@@ -47,24 +49,47 @@ view.addItem(sp3)
 
 # 
 i = 0
-flog = open('log/logMagForCalib.dat','w')
+if option == 'mag':
+    flog = open('log/logMagForCalib.dat','w')
+elif option == 'acc':
+    flog = open('log/logAccForCalib.dat','w')
 imu.stop()
 def update():
     global pos3,i,flog
-    tcurrent,acc,mag,gyr = imu.getMeasurements()
+    imu.getMeasurements()
+    accx,accy,accz,magx,magy,magz,gyrx,gyry,gyrz = imu.getRawData()
     psi,theta,phi = imu.getEuler()
     # dataTime.append(time.time()-t0)
     # mag/=npnorm(mag)
-    pos3[i,0]=mag[0]/500.
-    pos3[i,1]=mag[1]/500.
-    pos3[i,2]=mag[2]/500.
-    # pos3[i,0]=1.
-    # pos3[i,1]=0.
-    # pos3[i,2]=0.
-    i+=1
-    print i,mag
-    sp3.setData(pos=pos3)
-    flog.write('%s %s %s\n'%(mag[0],mag[1],mag[2]))
+    if option == 'mag':
+        pos3[i,0]=magx/500.
+        pos3[i,1]=magy/500.
+        pos3[i,2]=magz/500.
+        # pos3[i,0]=1.
+        # pos3[i,1]=0.
+        # pos3[i,2]=0.
+        i+=1
+        print i,magx,magy,magz
+        sp3.setData(pos=pos3)
+        flog.write('%s %s %s\n'%(magx,magy,magz))
+    elif option == 'acc':
+        if i == 0:
+            pos3[i,0]=accx
+            pos3[i,1]=accy
+            pos3[i,2]=accz
+        else:
+            pos3[i,0]= 0.9 * pos3[i-1,0] + 0.1 * accx
+            pos3[i,1]= 0.9 * pos3[i-1,1] + 0.1 * accy
+            pos3[i,2]= 0.9 * pos3[i-1,2] + 0.1 * accz
+
+        # pos3[i,0]=1.
+        # pos3[i,1]=0.
+        # pos3[i,2]=0.
+    
+        print i,accx,accy,accz
+        sp3.setData(pos=pos3/100.)
+        flog.write('%s %s %s\n'%(pos3[i,0],pos3[i,1],pos3[i,2]))
+        i+=1
 
 timer = QtCore.QTimer()
 timer.timeout.connect(update)
