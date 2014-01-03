@@ -54,8 +54,8 @@ class IMU():
         # self.kp   Algorithm proportional gain  governs rate of convergence to accelerometer/magnetometer
         # self.ki   Algorithm integral gain  governs rate of convergence of gyroscope biases
 
-        self.Kp = 2
-        self.Ki = 0.5
+        self.Kp = 3
+        self.Ki = 0.002
         self.beta = 0.1
 
         if algo == 1 :
