@@ -2,7 +2,7 @@
 
 import smbus,time,datetime
 
-class srf02:
+class Srf02():
   def __init__(self):
     self.i2c = smbus.SMBus(1)
     # The address in hex, look it up in i2cdetect -y 1 if you're unsure
