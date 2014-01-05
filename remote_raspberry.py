@@ -8,6 +8,7 @@ sudo python remote_raspberry.py
 import Pyro4
 from imu import IMU
 from capteurs import Altimeter
+from motors import Motors
 
 imu=IMU(algo = 3)
 altimeter = Altimeter()
