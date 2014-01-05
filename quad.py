@@ -89,3 +89,5 @@ class Quad():
         while self.running:
             self.setDistributedPower()
             time.sleep(0.1)
+    def getDistributedPower(self):
+        return self.distributedPower

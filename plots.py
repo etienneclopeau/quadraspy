@@ -128,7 +128,7 @@ def update():
     psi,theta,phi = imu.getEuler()
     gyr_ba = imu.get_eInt()
     emagx,emagz = imu.getEarth_mag()
-    m1,m2,m3,m4 = quad.distributedPower
+    
 
     dataTime.append(time.time()-t0)
     dataAccx.append(accx)
