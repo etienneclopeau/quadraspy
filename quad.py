@@ -33,16 +33,13 @@ class Quad():
         self.running = True
         threading.Thread(target = self.run).start()
         
-    def getPower(self, option = 'regul_alt'):
+    def getPower(self, option = 'test'):
         if option == 'test':
-            return 0.4
+            power =  0.5
             
         else: 
-            # alt = self.altimeter.getAltitude()
-            # power = self.pid_alt.compute(alt, self.alt_c)
-            alt = self.power_precedent
+            alt = self.altimeter.getAltitude()
             power = self.pid_alt.compute(alt, self.alt_c)
-            self.power_precedent = power
         print 'power',power,alt
         return power
 
