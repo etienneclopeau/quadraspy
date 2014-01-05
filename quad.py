@@ -28,6 +28,8 @@ class Quad():
 
         self.power_precedent = 0.
 
+        self.setConsigne()
+
         self.running = True
         threading.Thread(target = self.run).start()
         
@@ -51,13 +53,13 @@ class Quad():
         vmax = 0.5
 
         if option == 'maintainConsign':
-            regul_roll = self.pid_roll.compute(roll, roll_c)
+            regul_roll = self.pid_roll.compute(roll, self.roll_c)
             if regul_roll > vmax : regul_roll = vmax
             if regul_roll < vmin : regul_roll = vmin
-            regul_pitch = self.pid_pitch.compute(pitch, pitch_c)
+            regul_pitch = self.pid_pitch.compute(pitch, self.pitch_c)
             if regul_pitch > vmax : regul_pitch = vmax
             if regul_pitch < vmin : regul_pitch = vmin
-            regul_yaw = self.pid_yaw.compute(yaw, yaw_c)
+            regul_yaw = self.pid_yaw.compute(yaw, self.yaw_c)
             if regul_yaw > vmax : regul_yaw = vmax
             if regul_yaw < vmin : regul_yaw = vmin
             
