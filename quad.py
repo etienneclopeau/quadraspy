@@ -35,7 +35,9 @@ class Quad():
         
     def getPower(self, option = 'test'):
         if option == 'test':
+            alt = 1
             power =  0.5
+
             
         else: 
             alt = self.altimeter.getAltitude()
