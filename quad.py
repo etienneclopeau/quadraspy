@@ -2,7 +2,6 @@
 import threading
 from numpy import array
 from pid import PID
-from capteurs import Altimeter()
 import time
 
 
