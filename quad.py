@@ -77,6 +77,8 @@ class Quad():
         
         self.distributedPower = equilibration * power
 
+        print 'distributedPower', equilibration,power,self.distributedPower
+
         self.motors.setMotorsSpeed(self.distributedPower)
         
 
