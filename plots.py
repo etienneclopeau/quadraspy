@@ -37,28 +37,31 @@ view.resize(800,600)
 
 magP = lay.addPlot(title = "magnetometers")
 # magP.setRange(xRange = (0,10),yRange = (-1,1))
+magP.addLegend()
 magP.showGrid(y=True)
-magCx = magP.plot([0],[0],pen='y')
-magCy = magP.plot([0],[0],pen='b')
-magCz = magP.plot([0],[0],pen='r')
+magCx = magP.plot([0],[0],pen='y', name="x")
+magCy = magP.plot([0],[0],pen='b', name="y")
+magCz = magP.plot([0],[0],pen='r', name="z")
 # magWidget = gl.GLViewWidget()
 # lay.addWidget(magWidget)
 
 EulerP = lay.addPlot(title = "Euler")
+EulerP.addLegend()
 EulerP.showGrid(y=True)
 psiC = EulerP.plot([0],[0],pen='y')
 thetaC = EulerP.plot([0],[0],pen='b')
 phiC = EulerP.plot([0],[0],pen='r')
 
-
 lay.nextRow()
 accP = lay.addPlot(title = "accelerometres")
+accP.addLegend()
 accP.showGrid(y=True)
 accCx = accP.plot([0],[0],pen='y')
 accCy = accP.plot([0],[0],pen='b')
 accCz = accP.plot([0],[0],pen='r')
 
 EmagP = lay.addPlot(title = "earth magnetic field")
+EmagP.addLegend()
 EmagP.showGrid(y=True)
 EmagCx = EmagP.plot([0],[0],pen='y')
 EmagCz = EmagP.plot([0],[0],pen='r')
@@ -66,12 +69,14 @@ EmagCz = EmagP.plot([0],[0],pen='r')
 
 lay.nextRow()
 gyrP = lay.addPlot(title = "gyrometres")
+gyrP.addLegend()
 gyrP.showGrid(y=True)
 gyrCx = gyrP.plot([0],[0],pen='y')
 gyrCy = gyrP.plot([0],[0],pen='b')
 gyrCz = gyrP.plot([0],[0],pen='r')
 
 gyrbP = lay.addPlot(title = "gyrometres biais")
+gyrbP.addLegend()
 gyrbP.showGrid(y=True)
 gyrbCx = gyrbP.plot([0],[0],pen='y')
 gyrbCy = gyrbP.plot([0],[0],pen='b')
@@ -99,6 +104,12 @@ dataPsi = list()
 dataPhi = list()
 dataEmagx = list()
 dataEmagz = list()
+
+dataM1 = list()
+dataM2 = list()
+dataM3 = list()
+dataM4 = list()
+
 maxtime = 20.
 mintime = 0.
 t0 = time.time()
@@ -117,6 +128,8 @@ def update():
     psi,theta,phi = imu.getEuler()
     gyr_ba = imu.get_eInt()
     emagx,emagz = imu.getEarth_mag()
+    m1,m2,m3,m4 = quad.distributedPower
+
     dataTime.append(time.time()-t0)
     dataAccx.append(accx)
     dataAccy.append(accy)
@@ -169,6 +182,7 @@ def update():
         EulerP.setRange(xRange = (mintime,maxtime))
         gyrbP.setRange(xRange = (mintime,maxtime))
         EmagP.setRange(xRange = (mintime,maxtime))
+        motorsP.setRange(xRange = (mintime,maxtime))
 
     app.processEvents()  ## force complete redraw for every plot
 

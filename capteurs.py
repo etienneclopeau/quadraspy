@@ -124,7 +124,17 @@ class Gyr(itg3205):
         f.close()
         print 'biais gyro = ',self.dx,self.dy,self.dz
             
-    
+
+class Altimeter():
+    def __init__(self):
+        self.ultrason = Srf02()
+
+    def getAltitude(slef):
+        # dist = self.ultrason.getValue()
+        dist = 1.0
+        return dist
+
+
     
 def getCapteurs():
     acc = Acc()
