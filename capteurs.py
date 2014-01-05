@@ -129,8 +129,9 @@ class Gyr(itg3205):
 class Altimeter():
     def __init__(self):
         # self.ultrason = Srf02()
+        pass
 
-    def getAltitude(slef):
+    def getAltitude(self):
         # dist = self.ultrason.getValue()
         dist = 1.0
         return dist
