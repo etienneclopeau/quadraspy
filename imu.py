@@ -122,8 +122,10 @@ class IMU():
         self.tbefore = self.tcurrent
         self.tcurrent = time()
         self.deltat = self.tcurrent - self.tbefore
-        self.acc = 0.5 * self.acc + 0.5 * self.accelerometer.getAcc()
-        self.gyr = 0.5 * self.gyr + 0.5 * self.gyrometer.getGyr()
+        self.acc = self.accelerometer.getAcc()
+        # self.acc = 0.5 * self.acc + 0.5 * self.accelerometer.getAcc()
+        self.gyr = self.gyrometer.getGyr()
+        # self.gyr = 0.5 * self.gyr + 0.5 * self.gyrometer.getGyr()
         self.mag = self.magnetometer.getMag()
 
 

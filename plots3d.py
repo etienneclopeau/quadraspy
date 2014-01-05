@@ -87,7 +87,7 @@ def update():
         # pos3[i,2]=0.
     
         print i,accx,accy,accz
-        sp3.setData(pos=pos3/100.)
+        sp3.setData(pos=pos3)
         flog.write('%s %s %s\n'%(pos3[i,0],pos3[i,1],pos3[i,2]))
         i+=1
 
