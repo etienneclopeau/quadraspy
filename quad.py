@@ -69,7 +69,7 @@ class Quad():
     def setDistributedPower(self):
         
         power = self.getPower()
-        equilibration = self.getAttitudeRegulation(self.roll_c, self.pitch_c, self.yaw_c)
+        equilibration = self.getAttitudeRegulation()
         
         self.distributedPower = equilibration * power
 
