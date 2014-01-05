@@ -43,7 +43,7 @@ class Quad():
             alt = self.power_precedent
             power = self.pid_alt.compute(alt, self.alt_c)
             self.power_precedent = power
-        print 'power',power
+        print 'power',power,alt
         return power
 
     def getAttitudeRegulation(self, option = 'maintainConsign'):
