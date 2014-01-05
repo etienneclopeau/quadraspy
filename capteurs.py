@@ -10,6 +10,7 @@ from numpy import cos, sin, array
 from adxl345 import adxl345
 from itg3205 import itg3205
 from hmc5883l import hmc5883l
+from srf02 import Srf02
 from calibration import getData, ellipsoidFit_DistanceSphere,logValues, plot,getCalData
 
 fileCalAcc = '_calibrationAcc.dat'
@@ -127,7 +128,7 @@ class Gyr(itg3205):
 
 class Altimeter():
     def __init__(self):
-        self.ultrason = Srf02()
+        # self.ultrason = Srf02()
 
     def getAltitude(slef):
         # dist = self.ultrason.getValue()
