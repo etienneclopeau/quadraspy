@@ -29,7 +29,7 @@ class Quad():
         self.power_precedent = 0.
 
         self.running = True
-        threading.Thread(target = self.run)?start()
+        threading.Thread(target = self.run).start()
         
     def getPower(self, option = 'regul_alt'):
         if option == 'test':
