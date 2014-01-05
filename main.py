@@ -12,8 +12,9 @@ from motors import Motors
 from quad import Quad
 
 imu = IMU()
+altimeter = Altimeter()
 motors = Motors()
-quad = Quad(imu,motors)
+quad = Quad(imu,motors,altimeter)
 
 #convegence de l'IMU
 time.sleep(30)

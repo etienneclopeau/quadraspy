@@ -47,6 +47,7 @@ class IMU():
             from capteurs import getCapteurs
             self.getMeasurements = self.getMeasurements_real
             self.accelerometer, self.magnetometer, self.gyrometer = getCapteurs()
+            # self.accelerometer, self.magnetometer, self.gyrometer, self.ultrason = getCapteurs()
         else:
             self.simuFile = open(simu)
             self.getMeasurements = self.getMeasurements_simu
@@ -127,6 +128,8 @@ class IMU():
         self.gyr = self.gyrometer.getGyr()
         # self.gyr = 0.5 * self.gyr + 0.5 * self.gyrometer.getGyr()
         self.mag = self.magnetometer.getMag()
+        # self.distSol = self.ultrason.getAlt()
+        # self.pressure = self.baro.getPressure()
 
 
     def getMeasurements_simu(self):
@@ -144,6 +147,8 @@ class IMU():
             self.acc = array(res[1:4])
             self.mag = array(res[4:7])
             self.gyr = array(res[7:10])
+            # self.distSol = res[10]
+            # self.pressure = res[11]
             self.deltat = self.tcurrent - self.tbefore
         except: 
             print "endOfLog"

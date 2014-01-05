@@ -1,7 +1,9 @@
 
+import threading
 from numpy import array
 from pid import PID
-
+from capteurs import Altimeter()
+import time
 
 
 matPitch =   array([[ 1, 1],
@@ -13,27 +15,33 @@ matRoll =   array([[ 1,-1],
 
 
 class Quad():
-    def __init__(self, imu, motors):
+    def __init__(self, imu, motors, altimeter):
 
         self.imu = imu
+        self.altimeter = altimeter
         self.motors = motors
 
 
-        self.pid_alt = PID(1,0,1)
+        self.pid_alt = PID(1,1,1)
         self.pid_roll = PID(1,0,1)
         self.pid_pitch = PID(1,0,1)
         self.pid_yaw = PID(1,0,1)
 
+        self.power_precedent = 0.
 
+        self.running = True
+        threading.Thread(target = self.run)?start()
         
     def getPower(self, option = 'regul_alt'):
         if option == 'test':
             return 0.4
             
         else: 
-            alt = self.imu.getAlt()
+            # alt = self.altimeter.getAltitude()
+            # power = self.pid_alt.compute(alt, self.alt_c)
+            alt = self.power_precedent
             power = self.pid_alt.compute(alt, self.alt_c)
-
+            self.power_precedent = power
         return power
 
     def getAttitudeRegulation(self, option = 'maintainConsign'):
@@ -75,3 +83,8 @@ class Quad():
         self.yaw_c = yaw_c
         self.pitch_c = pitch_c
     
+    def run(self):
+        self.setConsigne()
+        while self.running:
+            self.setDistributedPower()
+            time.sleep(0.1)
