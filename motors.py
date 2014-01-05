@@ -4,6 +4,9 @@ Created on Thu Oct 17 13:56:55 2013
 
 @author: clopeau
 """
+import logging
+log_format = '%(levelname)s | %(asctime)-15s | %(message)s'
+logging.basicConfig(format=log_format, level=logging.WARNING)
 import time
 try :
     from RPIO import PWM

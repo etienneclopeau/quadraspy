@@ -32,7 +32,7 @@ class animatedPlot():
         self.maxtime = 20.
         self.mintime = 0.
         self.deltat = 10.
-
+        colors = ['r','b','g','y']
 
         self.p = lay.addPlot(title = title)
         self.p.addLegend()
@@ -40,9 +40,9 @@ class animatedPlot():
         self.lines = list()
         self.data = list()
         self.data.append(list())  #time
-        for line in lines:
+        for i,line in enumerate(lines):
             self.data.append(list())
-            self.lines.append(self.p.plot([0],[0],pen='y',name = line))
+            self.lines.append(self.p.plot([0],[0],pen=colors[i],name = line))
 
     def append(self,values):
         for i,(d, v) in  enumerate(zip(self.data, values)):
@@ -105,7 +105,7 @@ def update():
     gyrErr.append((T1,gyr_ba[0],gyr_ba[1],gyr_ba[2]))
     euler.append((T1,psi,theta,phi,alt))
     Emag.append((T1,emagx,emagz))
-    print m1,m2,m3,m4
+    # print m1,m2,m3,m4
     motors.append((T1,m1,m2,m3,m4))
 
 
