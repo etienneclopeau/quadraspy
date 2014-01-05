@@ -9,6 +9,7 @@ import Pyro4
 from imu import IMU
 from capteurs import Altimeter
 from motors import Motors
+from quad import Quad
 
 imu=IMU(algo = 3)
 altimeter = Altimeter()
