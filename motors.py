@@ -29,6 +29,8 @@ class Motor():
         
     def setSpeed(self,speed):
         #speed is between 0 to 1
+        if speed > 1. : speed =1.
+        elif speed < 0. : speed = 0.
         pulse = int(self.minpulse + speed*(self.maxpulse-self.minpulse))
         
         self.PWMservo.set_servo(self.pin , pulse)
@@ -104,7 +106,7 @@ class Motors():
             self.motor3.setSpeed(0)
             self.motor4.setSpeed(0)
             time.sleep(5)
-            print """ your ESC should know be calibrated"""
+            print """ your ESC should now be calibrated"""
 
         elif motor == 1: self.motor1.calibrate()
         elif motor == 2: self.motor2.calibrate()
