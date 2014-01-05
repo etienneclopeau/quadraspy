@@ -43,6 +43,7 @@ class Quad():
             alt = self.power_precedent
             power = self.pid_alt.compute(alt, self.alt_c)
             self.power_precedent = power
+        print 'power',power
         return power
 
     def getAttitudeRegulation(self, option = 'maintainConsign'):
@@ -64,6 +65,7 @@ class Quad():
             if regul_yaw < vmin : regul_yaw = vmin
             
             dmotors = (regul_roll*matRoll + 1) * (regul_pitch*matPitch + 1) * (regul_yaw*matYaw + 1)
+            print 'attitude',regul_roll,regul_pitch,regul_yaw,dmotors
             return dmotors
 
         else: raise(notimplementederror)

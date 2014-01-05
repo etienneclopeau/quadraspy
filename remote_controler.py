@@ -96,7 +96,7 @@ def update():
     gyr_ba = imu.get_eInt()
     emagx,emagz = imu.getEarth_mag()
     alt = altimeter.getAltitude()
-    distpow =  quad.distributedPower
+    distpow =  quad.getDistributedPower()
     m1,m2,m3,m4 = distpow[0,0],distpow[0,1],distpow[1,0],distpow[1,1]
     T1 = time.time()-t0
     mag.append((T1,magx,magy,magz))
@@ -105,6 +105,7 @@ def update():
     gyrErr.append((T1,gyr_ba[0],gyr_ba[1],gyr_ba[2]))
     euler.append((T1,psi,theta,phi,alt))
     Emag.append((T1,emagx,emagz))
+    print m1,m2,m3,m4
     motors.append((T1,m1,m2,m3,m4))
 
 
