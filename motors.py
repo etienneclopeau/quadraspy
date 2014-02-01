@@ -21,7 +21,7 @@ except:
             pass
     PWMservo = noRPIO()
 
-PWMservo.set_loglevel(PWM.LOG_LEVEL_ERRORS)
+PWM.set_loglevel(PWM.LOG_LEVEL_ERRORS)
 
 class Motor():
     def __init__(self,PWMservo , pin):
