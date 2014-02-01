@@ -12,7 +12,6 @@ import time
 try :
     from RPIO import PWM
     PWMservo = PWM.Servo(dma_channel=0, subcycle_time_us=20000, pulse_incr_us=1)
-    PWMservo.set_loglevel(PWM.LOG_LEVEL_ERRORS)
 except:
     print 'Warning: RPIO not availabe'
     class noRPIO():
@@ -21,6 +20,8 @@ except:
         def set_servo(self):
             pass
     PWMservo = noRPIO()
+
+PWMservo.set_loglevel(PWM.LOG_LEVEL_ERRORS)
 
 class Motor():
     def __init__(self,PWMservo , pin):
