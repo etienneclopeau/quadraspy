@@ -4,14 +4,15 @@ Created on Thu Oct 17 13:56:55 2013
 
 @author: clopeau
 """
-import logging
-log_format = '%(levelname)s | %(asctime)-15s | %(message)s'
-logging.basicConfig(format=log_format, level=logging.WARNING)
+# import logging
+# log_format = '%(levelname)s | %(asctime)-15s | %(message)s'
+# logging.basicConfig(format=log_format, level=logging.WARNING)
+
 import time
 try :
     from RPIO import PWM
     PWMservo = PWM.Servo(dma_channel=0, subcycle_time_us=20000, pulse_incr_us=1)
-
+    PWMservo.set_loglevel(PWM.LOG_LEVEL_ERRORS)
 except:
     print 'Warning: RPIO not availabe'
     class noRPIO():
